@@ -1,0 +1,37 @@
+Routes:
+  home:
+    path: '/'
+    controller: '\App\Controller\HomeController'
+    method: 'index'
+    slug: []
+  calculator:
+    path: '/calculator'
+    controller: '\App\Controller\HomeController'
+    method: 'calculator'
+    slug: []
+  register:
+    path: '/register'
+    controller: '\App\Controller\UserController'
+    method: 'register'
+    slug: []
+  login:
+    path: '/login'
+    controller: '\App\Controller\UserController'
+    method: 'login'
+    slug: []
+  logout:
+    path: '/logout'
+    controller: '\App\Controller\UserController'
+    method: 'logout'
+    slug: []
+  admin:
+    path: '/admin'
+    controller: '\App\Controller\Admin\DashboardCrudController'
+    method: 'admin'
+    slug: []
+  adminlogin:
+    path: '/admin/login'
+    controller: '\App\Controller\UserController'
+    method: 'adminLogin'
+    slug: []
+
