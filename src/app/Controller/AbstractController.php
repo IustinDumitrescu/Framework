@@ -17,7 +17,7 @@ abstract class AbstractController implements ControllerInterface
     /**
      * @var ContainerInterface
      */
-    public $container;
+    protected $container;
 
     public function __construct(ContainerInterface $container)
     {
@@ -159,9 +159,11 @@ abstract class AbstractController implements ControllerInterface
             $user = $this->getUser($session);
         }
 
+
         if (!is_object($entityManager)) {
             $entityManager = new $entityManager();
         }
+
 
         if ($user) {
            if($entityManager->findBy(AdminEntity::class, ["user_id" => $user->getId()])) {

@@ -9,7 +9,9 @@
 namespace App\Controller\Admin;
 
 
-use App\Admin\AdminDashboardConfigurator;
+
+use App\Admin\Fields\AdminDashboardField;
+use App\Admin\Config\AdminDashboardConfigurator;
 use App\Entity\AdminEntity;
 use App\Entity\UserEntity;
 use App\Http\Request;
@@ -32,23 +34,41 @@ class DashboardCrudController extends AbstractCrudController
         Request $request
     ): string
     {
-        $admin = $this->initializeAdminLayout($session, $request);
+        $adminTemplate = $this->initializeAdminLayout($session, $request);
 
-        $user = $this->getUser($session);
+        $template = $this->configureDashboard($adminTemplate["user"], $adminTemplate["admin"], $request);
 
-        dd($this->configureDashboard($user));
+        if (!$template) {
+            $this->redirect('/admin');
+        }
+
+        $adminTemplate["templateAdmin"] = $template;
+
+        return $this->render('/admin/homeLayout', $adminTemplate );
 
     }
 
-
-    private function configureDashboard($user)
+    /**
+     * @param UserEntity $user
+     * @param AdminEntity $admin
+     * @param Request $request
+     * @return \App\Admin\Template\AdminTemplate
+     */
+    private function configureDashboard(
+        UserEntity $user,
+        AdminEntity $admin,
+        Request $request
+    ): ?\App\Admin\Template\AdminTemplate
     {
-       return AdminDashboardConfigurator::configureForThisUser($user)
-            ->new(UserEntity::class)
-            ->new(AdminEntity::class)
-            ->getConfiguration();
+        return AdminDashboardConfigurator::configureForThisUser($user, $admin, $request, $this->container)
+            ->configureItems(
+                AdminDashboardField::new('Admini',AdminCrudController::class)
+            )->getConfiguration();
 
     }
+
+
+
 
 
 }

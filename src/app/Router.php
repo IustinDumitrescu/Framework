@@ -42,7 +42,7 @@ final class Router
 
     public function createRoutes(): void
     {
-        $routes = yaml_parse_file(Kernel::getRootDirectory().'config/routing/routing.yaml');
+        $routes = yaml_parse_file(Kernel::getRootDirectory().'Config/routing/routing.yaml');
 
         foreach ($routes["Routes"] as $route) {
             $this->add($route["path"], $route["controller"], $route["method"], $route["slug"]);
@@ -107,7 +107,7 @@ final class Router
             $positionOf = strpos($getUriParam, $value);
 
             if($posOfVariable !== false && $positionOf !== false
-                && preg_match_all("#$value(\?|\&)([^=]+)\=([^&]+)#i",$getUriParam)) {
+                && preg_match_all("#^$value(\?|\&)([^=]+)\=([^&]+)#i",$getUriParam)) {
 
                 if(isset($this->method[$key], $this->controller[$key])) {
 

@@ -107,37 +107,33 @@ class LoginFirewall
                 $passwordInput = trim(filter_var($contentOfLoginData["password_login"],FILTER_SANITIZE_STRING));
 
                 if (password_verify($passwordInput, $user->getHashPass())) {
-                    if ($session->get('user') === null) {
-                        $session->set('user', $user);
-                    }
 
-                    if ($request->cookie->get('u_s_r_d') === null) {
-                        $request->cookie->setCookie('u_s_r_d', $user->getId(), [
-                            "expires" => time() + 1800,
-                            "path" => '/',
-                            "secure" => true,
-                            "httponly" => true
-                        ]);
+                    $session->set('user', $user);
 
-                    }
 
-                    if ($session->get('admin') === null || $request->cookie->get('a_d_u_s_r') === null) {
-                        $adminRepository = $this->container->get(AdminRepository::class);
+                    $request->cookie->setCookie('u_s_r_d', $user->getId(), [
+                        "expires" => time() + 1800,
+                        "path" => '/',
+                        "secure" => true,
+                        "httponly" => true
+                    ]);
 
-                        $admin = $adminRepository->findBy(AdminEntity::class, ['user_id' => $user->getId()]);
 
-                        $session->set('admin', $admin);
+                    $adminRepository = $this->container->get(AdminRepository::class);
 
-                        $request->cookie->setCookie('a_d_u_s_r', $admin->getId(), [
-                            "expires" => time() + 1800,
-                            "path" => '/',
-                            "secure" => true,
-                            "httponly" => true
-                        ]);
+                    $admin = $adminRepository->findBy(AdminEntity::class, ['user_id' => $user->getId()]);
 
-                    }
+                    $session->set('admin', $admin);
 
-                    return $controller->redirectToRoute('/admin');
+                    $request->cookie->setCookie('a_d_u_s_r', $admin->getId(), [
+                        "expires" => time() + 1800,
+                        "path" => '/',
+                        "secure" => true,
+                        "httponly" => true
+                    ]);
+
+
+                    return $controller->redirect('/admin');
                 }
 
                 return $controller->redirectToRoute('/admin/login', [
@@ -147,7 +143,10 @@ class LoginFirewall
 
             }
 
-            return $controller->redirect('/');
+            return $controller->redirectToRoute('/admin/login', [
+                    "flashString" => "nuexista",
+                ]
+            );
 
         }
     }

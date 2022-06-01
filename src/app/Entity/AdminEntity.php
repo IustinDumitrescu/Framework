@@ -14,13 +14,13 @@ class AdminEntity
 
     public const TableName = 'admin';
 
-    private $id;
+    private ?int $id;
 
-    private $user_id;
+    private ?int $user_id;
 
-    private $rol;
+    private ?string $rol;
 
-    private $super_admin;
+    private ?bool $super_admin;
 
     private $created_at;
 

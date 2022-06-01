@@ -8,32 +8,74 @@
 
 namespace App\Controller\Admin;
 
-
+use App\Admin\Action\AdminAction;
+use App\Admin\Config\AdminContext;
+use App\Admin\Config\AdminDashboardConfigurator;
 use App\Controller\AbstractController;
-use App\Entity\AdminEntity;
 use App\Http\Request;
 use App\Interfaces\SessionInterface;
 
 abstract class AbstractCrudController extends AbstractController
 {
-    public function initializeAdminLayout(SessionInterface $session, Request $request) :AdminEntity
+
+    public function initializeAdminLayout(SessionInterface $session, Request $request) :array
     {
-        if (!$session->isStarted() || !$this->isAdmin($session) || $session->get('admin') === null) {
+        $adminTemplate = [];
+
+        if (!$session->isStarted()
+            || !$this->isAdmin($session)
+            || $session->get('admin') === null
+            || $request->cookie->get('a_d_u_s_r') === null) {
             $this->redirectToRoute('/admin/login');
         }
 
-        if ($request->cookie->get('a_d_u_s_r') === null) {
-            $request->cookie->setCookie('u_s_r_d', $this->getUser($session)->getId(), [
-                "expires" => time() + 1800,
-                "path" => '/',
-                "secure" => true,
-                "httponly" => true
-            ]);
-        }
+        $adminTemplate["user"] = $this->getUser($session);
 
-        return $session->get('admin');
+        $adminTemplate["admin"] = $session->get('admin');
+
+        return $adminTemplate;
+    }
+
+    public function configureActions(): array
+    {
+        return [
+             new AdminAction(
+                 AdminContext::AdminActionIndex,
+                 '',
+                 '',
+                 true,
+                 AdminDashboardConfigurator::PageIndex
+             ),
+             new AdminAction(
+                 AdminContext::AdminActionShow,
+                 'Show',
+                 'fa-solid fa-eye',
+                 false,
+                 AdminDashboardConfigurator::PageShow
+             ),
+             new AdminAction(
+                 AdminContext::AdminActionEdit,
+                 'Edit',
+                 'fas fa-edit',
+                 false,
+                 AdminDashboardConfigurator::PageEdit
+             ),
+             new AdminAction(
+                 AdminContext::AdminActionNew,
+                 'Adauga',
+                 'fa-solid fa-plus',
+                 true,
+                 AdminDashboardConfigurator::PageNew
+             )
+        ];
+    }
+
+    public function index(AdminContext $adminContext)
+    {
 
     }
+
+
 
 
 

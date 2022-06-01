@@ -75,5 +75,16 @@ class Request
         return $this->server->get('REQUEST_METHOD');
     }
 
+    public function getHost()
+    {
+        return $this->server->get('HTTP_HOST');
+    }
+
+    public function getRequestedUri()
+    {
+        return $this->server->get('REQUEST_URI');
+    }
+
+
 
 }

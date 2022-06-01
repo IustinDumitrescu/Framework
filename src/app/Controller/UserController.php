@@ -56,6 +56,7 @@ class UserController extends AbstractController
     {
         $templateVars = $this->initializeLayout($session, $request,false);
 
+
         $flashString = filter_var($request->query->get('flashString'),FILTER_SANITIZE_STRING);
 
         $formLogin = $this->createForm(LoginType::class, [
@@ -123,46 +124,44 @@ class UserController extends AbstractController
         Request $request
     )
     {
+        $templateVars = $this->initializeLayout($session, $request, null);
 
-        if ($this->isAdmin($session)) {
-
-            $templateVars = $this->initializeLayout($session, $request, null);
-
-            $flashString = filter_var($request->query->get('flashString'), FILTER_SANITIZE_STRING);
-
-            $formLoginAdmin = $this->createForm(LoginType::class, [
-                "name" => "login_admin_form",
-                "method" => "POST",
-                "action" => '',
-                "id" => "form_login_admin"
-            ]);
-
-
-            if (!empty($flashString)) {
-
-                if ($flashString === 'nuexista') {
-                    $flashStrings = 'User-ul nu exista';
-                    $flashValue = false;
-                }
-
-                if ($flashString === 'parolagresita') {
-                    $flashStrings = 'Parola este gresita';
-                    $flashValue = false;
-                }
-
-                $templateVars["flash"] = [
-                    "flashString" => $flashStrings,
-                    "flashType" => $flashValue
-                ];
-
-            }
-
-            $templateVars["formLoginAdmin"] = $formLoginAdmin->createView();
-
-            return $this->render('/admin/adminLogin', $templateVars);
+        if ($this->isAdmin($session) && $session->get('admin') !== null && $request->cookie->get('a_d_u_s_r') !== null) {
+            $this->redirect('/admin');
         }
 
-        return 'notadmin';
+        $flashString = filter_var($request->query->get('flashString'), FILTER_SANITIZE_STRING);
+
+        $formLoginAdmin = $this->createForm(LoginType::class, [
+            "name" => "login_admin_form",
+            "method" => "POST",
+            "action" => '',
+            "id" => "form_login_admin"
+        ]);
+
+
+        if (!empty($flashString)) {
+
+            if ($flashString === 'nuexista') {
+                $flashStrings = 'User-ul nu exista';
+                $flashValue = false;
+            }
+
+            if ($flashString === 'parolagresita') {
+                $flashStrings = 'Parola este gresita';
+                $flashValue = false;
+            }
+
+            $templateVars["flash"] = [
+                "flashString" => $flashStrings,
+                "flashType" => $flashValue
+            ];
+
+        }
+
+        $templateVars["formLoginAdmin"] = $formLoginAdmin->createView();
+
+        return $this->render('/admin/adminLogin', $templateVars);
     }
 
 
