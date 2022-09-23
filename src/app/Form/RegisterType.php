@@ -9,6 +9,11 @@
 namespace App\Form;
 
 
+use App\Form\InputTypes\EmailType;
+use App\Form\InputTypes\NumberType;
+use App\Form\InputTypes\PasswordType;
+use App\Form\InputTypes\SubmitType;
+use App\Form\InputTypes\TextType;
 use App\Interfaces\FormBuilderInterface;
 
 class RegisterType extends AbstractType
@@ -19,15 +24,29 @@ class RegisterType extends AbstractType
         $builder->createHead($formHead);
 
         $builder
-            ->add("First Name",'first_name','text',["required" => "required"])
-            ->add("Last Name", 'last_name','text', ["required" => "required"])
-            ->add("Email",'email','email', ["required" => "required"])
-            ->add("Password",'password_register','password', ["required" => "required"])
-            ->add("Confirm Password",'confirm_password','password', ["required" => "required"])
-            ->add("Age",'age',"number", [])
-            ->add("Phone",'telefon','text', ["required" => "required"])
-            ->add("Address", 'adresa','text',[])
-            ->add('Register','register_submit','submit', []);
+            ->add("First Name",'first_name',TextType::class,[
+                "required" => "required"
+            ])
+            ->add("Last Name", 'last_name',TextType::class, [
+                "required" => "required"
+            ])
+            ->add("Email",'email',EmailType::class, [
+                "required" => "required"
+            ])
+            ->add("Password",'password_register',PasswordType::class, [
+                "required" => "required"
+            ])
+            ->add("Confirm Password",'confirm_password',PasswordType::class, [
+                "required" => "required"
+            ])
+            ->add("Age",'age',NumberType::class, [
+
+            ])
+            ->add("Phone",'telefon',TextType::class, [
+                "required" => "required"
+            ])
+            ->add("Address", 'adresa',TextType::class,[])
+            ->add('Register','register_submit',SubmitType::class, []);
 
 
         return $builder;

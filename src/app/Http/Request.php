@@ -11,17 +11,19 @@ namespace App\Http;
 
 class Request
 {
-    public $request ;
+    public ParameterBag $request ;
 
-    public $query ;
+    public ParameterBag $query ;
 
-    public $server;
+    public ParameterBag $server;
 
-    public  $cookie;
+    public ParameterBag $cookie;
 
-    protected static $trustedProxies = [];
+    public ParameterBag $files;
 
-    private static $trustedHeaderSet = -1;
+    protected static array $trustedProxies = [];
+
+    private static int $trustedHeaderSet = -1;
 
     public const HEADER_FORWARDED = 0b00001; // When using RFC 7239
     public const HEADER_X_FORWARDED_FOR = 0b00010;
@@ -45,9 +47,10 @@ class Request
 
         $this->cookie = new ParameterBag('cookie');
 
+        $this->files = new ParameterBag('files');
     }
 
-    public static function setTrustedProxies(array $proxies, int $trustedHeaderSet)
+    public static function setTrustedProxies(array $proxies, int $trustedHeaderSet): void
     {
         self::$trustedProxies = array_reduce($proxies, function ($proxies, $proxy) {
             if ('REMOTE_ADDR' !== $proxy) {
@@ -61,7 +64,7 @@ class Request
         self::$trustedHeaderSet = $trustedHeaderSet;
     }
 
-    public static function setTrustedHosts(array $hostPatterns)
+    public static function setTrustedHosts(array $hostPatterns): void
     {
         self::$trustedHostPatterns = array_map(function ($hostPattern) {
             return sprintf('{%s}i', $hostPattern);

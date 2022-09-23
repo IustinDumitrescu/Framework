@@ -11,7 +11,6 @@ namespace App\Interfaces;
 
 interface FormBuilderInterface
 {
-
     public function createHead(array $formHead) ;
 
     public function add(string $name, string $id , string $typeChosen, array $options) :self;
@@ -23,5 +22,4 @@ interface FormBuilderInterface
     public function isValid() :bool;
 
     public function isSubmitted() :bool;
-
 }

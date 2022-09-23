@@ -5,7 +5,7 @@ namespace App\Database;
 class Database
 {
 
-    public $connection;
+    public \mysqli $connection;
     
     public function __construct($host='localhost',$username= 'root',$parola='',$dbaname= 'mySite')
     {

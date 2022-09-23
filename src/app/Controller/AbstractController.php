@@ -9,6 +9,7 @@ use App\Interfaces\ControllerInterface;
 use App\Http\Request;
 use App\Interfaces\EntityManagerInterface;
 use App\Interfaces\SessionInterface;
+use App\Repository\EntityManager;
 use Psr\Container\ContainerInterface;
 
 abstract class AbstractController implements ControllerInterface
@@ -17,7 +18,7 @@ abstract class AbstractController implements ControllerInterface
     /**
      * @var ContainerInterface
      */
-    protected $container;
+    protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
@@ -38,7 +39,7 @@ abstract class AbstractController implements ControllerInterface
      * @param array $data
      * @return false|string
      */
-   public function render(string $template, Array $data)
+   public function render(string $template, Array $data): bool|string
    {
         ob_start();
 
@@ -88,6 +89,17 @@ abstract class AbstractController implements ControllerInterface
        $user = $session->get('user');
 
        $userCookie = $request->cookie->get('u_s_r_d');
+
+      if(!$user && $userCookie) {
+           $user = $this->container->get(EntityManager::class)
+               ->find(UserEntity::class,  (int)$userCookie);
+
+           if (empty($user)) {
+               return false;
+           }
+
+           $session->set('user', $user);
+       }
 
        if ($user && $userCookie && $user->getId() === (int)$userCookie) {
            return true;
@@ -151,7 +163,7 @@ abstract class AbstractController implements ControllerInterface
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function isAdmin(SessionInterface $session, ?UserEntity $user = null)
+    public function isAdmin(SessionInterface $session, ?UserEntity $user = null): ?bool
     {
         $entityManager = $this->container->get(EntityManagerInterface::class);
 
@@ -166,7 +178,7 @@ abstract class AbstractController implements ControllerInterface
 
 
         if ($user) {
-           if($entityManager->findBy(AdminEntity::class, ["user_id" => $user->getId()])) {
+           if(!empty($entityManager->findBy(AdminEntity::class, ["user_id" => $user->getId()]))) {
                return true;
            }
             return false;

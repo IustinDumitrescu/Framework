@@ -12,13 +12,13 @@ namespace App\Admin\Fields;
 final class AdminListingField
 {
 
-    private $name;
+    private string $name;
 
-    private $id;
+    private string $id;
 
-    private $typeChosen;
+    private string $typeChosen;
 
-    private $options;
+    private array $options;
 
 
     public function __construct(string $name, string $id, string $typeChosen, array $options = [])
@@ -47,6 +47,18 @@ final class AdminListingField
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    public function setOption(string $name, $value): self
+    {
+        $this->options[$name] = $value;
+        return $this;
+    }
+
+    public function setOptions(array $options): self
+    {
+        $this->options = $options;
+        return $this;
     }
 
 }

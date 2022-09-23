@@ -9,10 +9,10 @@
 namespace App\Interfaces;
 
 
+use App\Repository\QueryBuilder;
+
 interface EntityManagerInterface
 {
-    public function getConnection();
-
     public function find(string $entityName, int $id);
 
     public function findBy(string $entityName , array $criteria);
@@ -22,5 +22,7 @@ interface EntityManagerInterface
     public function persist($object): string;
 
     public function flush(string $sql): void;
+
+    public function createQueryBuilder(): QueryBuilder;
 
 }

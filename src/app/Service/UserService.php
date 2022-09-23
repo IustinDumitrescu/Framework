@@ -19,7 +19,7 @@ final class UserService
     /**
      * @var UserRepository
      */
-    private $userRepository;
+    private UserRepository $userRepository;
 
     public function __construct(UserRepository $userRepository)
     {
@@ -69,7 +69,7 @@ final class UserService
 
         $user = $this->userRepository->findBy(UserEntity::class,["email" => $newData["email"]]);
 
-        if ($user !== null) {
+        if (!empty($user)) {
             return 'Adresa de email este utilizata de un alt utilizator';
         }
 

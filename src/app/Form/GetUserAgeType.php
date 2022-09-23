@@ -9,6 +9,9 @@
 namespace App\Form;
 
 
+use App\Form\InputTypes\NumberType;
+use App\Form\InputTypes\SubmitType;
+use App\Form\InputTypes\TextType;
 use App\Interfaces\FormBuilderInterface;
 
 class GetUserAgeType extends AbstractType
@@ -20,19 +23,19 @@ class GetUserAgeType extends AbstractType
          $builder->createHead($formHead);
 
          $builder
-             ->add('First Name', 'first_name', 'text', [
+             ->add('First Name', 'first_name', TextType::class, [
                  'required' => "required",
                  "value" => isset($options["data"]) ? $options["data"]["first_name"] : ''
              ])
-             ->add('Last Name','last_name','text', [
+             ->add('Last Name','last_name',TextType::class, [
                  'required' => "required",
                  "value" => isset($options["data"]) ? $options["data"]["last_name"] : ''
              ])
-             ->add('Age','age','number',[
+             ->add('Age','age',NumberType::class,[
                  'required' => "required",
                  "value" => isset($options["data"]) ? $options["data"]["age"] : ''
              ])
-             ->add('Submit','submit_get_user_age','submit',[]);
+             ->add('Submit','submit_get_user_age',SubmitType::class,[]);
 
 
          return $builder;

@@ -12,11 +12,11 @@ namespace App\Admin\Config;
 use App\Admin\AdminUtils;
 use App\Admin\Fields\AdminDashboardField;
 use App\Admin\Template\AdminTemplate;
+use App\Container;
 use App\Controller\Admin\DashboardCrudController;
 use App\Entity\AdminEntity;
 use App\Entity\UserEntity;
 use App\Http\Request;
-use App\Interfaces\ControllerInterface;
 use Psr\Container\ContainerInterface;
 
 class AdminDashboardConfigurator
@@ -29,17 +29,19 @@ class AdminDashboardConfigurator
 
     public const PageEdit = 'edit';
 
-    private static $dashboard_listing = [];
+    public const PageDelete = 'delete';
 
-    private $urls_of_dashboard = [];
+    private static array $dashboard_listing = [];
 
-    private static $user;
+    private array $urls_of_dashboard = [];
 
-    private static $admin;
+    private static ?UserEntity $user;
 
-    private static $request;
+    private static ?AdminEntity $admin;
 
-    private static $container;
+    private static Request $request;
+
+    private static Container $container;
 
 
     private function __construct()

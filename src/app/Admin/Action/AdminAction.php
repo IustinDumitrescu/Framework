@@ -14,22 +14,25 @@ use App\Admin\Config\AdminDashboardConfigurator;
 final class AdminAction
 {
 
-    private $name;
+    private string $name;
 
-    private $label;
+    private string $label;
 
-    private $icon;
+    private string $icon;
 
-    private $global;
+    private bool $global;
 
-    private $page;
+    private string $page;
+
+    private ?string $template;
 
     public function __construct(
         string $name,
         string $label = '',
         string $icon = '',
         bool $global = false,
-        string $page = AdminDashboardConfigurator::PageIndex
+        string $page = AdminDashboardConfigurator::PageIndex,
+        ?string $template = null
     )
     {
         $this->name = $name;
@@ -37,6 +40,7 @@ final class AdminAction
         $this->icon = $icon;
         $this->global = $global;
         $this->page = $page;
+        $this->template = $template;
     }
 
 
@@ -75,6 +79,11 @@ final class AdminAction
     public function getPage(): string
     {
         return $this->page;
+    }
+
+    public function getTemplate(): ?string
+    {
+        return $this->template;
     }
 
 

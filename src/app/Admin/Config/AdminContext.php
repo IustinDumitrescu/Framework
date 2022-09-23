@@ -12,7 +12,10 @@ namespace App\Admin\Config;
 use App\Admin\Action\AdminAction;
 use App\Admin\AdminUtils;
 use App\Admin\Template\AdminTemplate;
+use App\Controller\Admin\AbstractCrudController;
+use App\Controller\Admin\AdminCrudController;
 use App\Controller\Admin\DashboardCrudController;
+use App\Controller\Admin\NewsletterCategoryCrudController;
 use App\Entity\AdminEntity;
 use App\Http\Request;
 use Psr\Container\ContainerInterface;
@@ -27,6 +30,8 @@ class AdminContext
 
     public const AdminActionShow = 'show';
 
+    public const AdminActionDelete = 'delete';
+
     private static ?Request $request;
 
     private static ?ContainerInterface $container;
@@ -37,23 +42,27 @@ class AdminContext
 
     private static $dashBoardListing;
 
-    private static $adminTemplate;
+    private static AdminTemplate $adminTemplate;
 
     private array $signatures = [];
 
-    private  ?string $currentControllerName;
+    private ?string $controllerName = null;
 
-    private $currentController;
+    private object $currentController;
 
     private ?string $currentRequest;
 
-    private ?array $requestParams = [];
+    private array $requestParams = [];
 
-    private ?array $adminActions = [];
+    private array $adminActions = [];
 
-    private ?array $currentAction;
+    private ?AdminAction $currentAction;
 
-    private $currentSignature;
+    private ?string $currentSignature;
+
+    private array $fields = [];
+
+    private array $responseFromAction = [];
 
     private function __construct()
     {
@@ -78,7 +87,7 @@ class AdminContext
         return new self();
     }
 
-    public function getAction()
+    public function getAction(): bool|AdminTemplate
     {
         $requestAction = $this->handleRequest();
 
@@ -86,19 +95,33 @@ class AdminContext
            return false;
         }
 
-        if ($this->currentControllerName) {
+        if ($this->controllerName) {
             $actionsController = $this->configureActionsController();
 
             if ($actionsController) {
+                $isPermitted = false;
+                foreach (self::$dashBoardListing[0] as $list) {
+                    if($list["class"] === $this->controllerName
+                        && (in_array(self::$admin->getRol(), $list["permissions"], true)
+                            || self::$admin->getSuperAdmin())) {
+                        $isPermitted = true;
+                    }
+                }
+                if (!$isPermitted) {
+                    return false;
+                }
+                if($this->currentAction->getName() !== self::AdminActionDelete) {
+                    $this->fields = $this->currentController->configureFields($this);
+                }
 
-                $fields = $this->currentController->configureFields($this);
+                $action = $this->currentAction->getName();
 
-                dd($fields);
+                $this->responseFromAction = $this->currentController->$action($this);
+
+                return self::$adminTemplate->createActionTemplate($this);
             }
-
             return false;
         }
-
         return self::$adminTemplate;
     }
 
@@ -112,17 +135,38 @@ class AdminContext
 
          if (isset($params["/admin?crudCon"], $params["action"], $params["signature"])) {
 
+             foreach (self::$dashBoardListing[0] as $list) {
+
+                 if ($params["/admin?crudCon"] === $list["class"]) {
+
+                     $permissions = $list["permissions"];
+
+                     $rol = $this->getAdmin()->getRol();
+
+                     $superAdmin = $this->getAdmin()->getSuperAdmin() ? "SUPER-ADMIN" : "not";
+
+                     if (!in_array($rol, $permissions, true) && !in_array($superAdmin, $permissions, true)) {
+                         return false;
+                     }
+                 }
+             }
+
              if (!isset(self::$dashBoardListing[0]) || empty(self::$dashBoardListing[0])) {
                  return false;
              }
 
              foreach (self::$dashBoardListing[0] as $item) {
                  if (trim($item["class"]) === trim($params["/admin?crudCon"])) {
-                     $this->currentControllerName = trim($params["/admin?crudCon"]);
+                     $this->controllerName = trim($params["/admin?crudCon"]);
                  }
              }
 
-             if (empty($this->currentControllerName)) {
+             if ( ($params["action"] === self::AdminActionEdit || $params["action"] === self::AdminActionShow)
+                 && (empty($params["entityId"]))) {
+                 return  false;
+             }
+
+             if (empty($this->controllerName)) {
                  return false;
              }
 
@@ -144,7 +188,7 @@ class AdminContext
 
     private function configureActionsController(): bool
     {
-        $controller = self::getContainer()->get($this->currentControllerName);
+        $controller = self::getContainer()->get($this->controllerName);
 
         $this->currentController = $controller;
 
@@ -209,6 +253,30 @@ class AdminContext
     public function getCurrentRequest(): ?string
     {
         return $this->currentRequest;
+    }
+
+    public function getFields():?array
+    {
+        return $this->fields;
+    }
+
+    public function getController(): object
+    {
+        return $this->currentController;
+    }
+
+    public function getControllerName(): ?string
+    {
+        return $this->controllerName;
+    }
+
+    public function getResponseFromAction(): array
+    {
+        return $this->responseFromAction;
+    }
+    public function createSignatureUrl(AdminEntity $admin,string $action ): string
+    {
+        return AdminUtils::createSignatureUrl($admin, $action);
     }
 
 

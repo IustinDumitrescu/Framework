@@ -16,15 +16,17 @@ use ReflectionClass;
 final class Container implements ContainerInterface
 {
 
-    private $entries = [];
+    private array $entries = [];
 
+    /**
+     * @throws \ReflectionException
+     * @throws ContainerException
+     */
     public function get(string $id)
     {
         if ($this->has($id)) {
 
-            $entry = $this->entries[$id];
-
-            return $entry;
+            return $this->entries[$id];
         }
 
        return $this->resolve($id);
@@ -36,9 +38,9 @@ final class Container implements ContainerInterface
         return isset($this->entries[$id]);
     }
 
-    public function set(string $id, $concrete)
+    public function set(string $id, $concrete): void
     {
-        $this->entries[$id] = $concrete;
+        $this->entries[$id] = new $concrete();
     }
 
     /**
@@ -49,7 +51,7 @@ final class Container implements ContainerInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \ReflectionException
      */
-    public function resolve(string $id)
+    public function resolve(string $id): object|bool|int|array|string
     {
         $reflection = new ReflectionClass($id);
 
@@ -107,28 +109,21 @@ final class Container implements ContainerInterface
     }
 
 
-    public function dealWithItIfIsBuildIn( string $name)
+    public function dealWithItIfIsBuildIn( string $name): bool|int|array|string|null
     {
-        switch ($name) {
-            case 'int':
-                $type = 0;
-                break;
-            case 'string':
-               $type = '';
-                break;
-            case 'bool':
-                $type = false;
-                break;
-            case 'array':
-                $type = [];
-                break;
-            default:
-                $type = null;
-        }
-
-        return $type;
+        return match ($name) {
+            'int' => 0,
+            'string' => '',
+            'bool' => false,
+            'array' => [],
+            default => null,
+        };
     }
 
+    /**
+     * @throws \ReflectionException
+     * @throws ContainerException
+     */
     public function dealWithItIfIsInterface(ReflectionClass $reflection)
     {
         $kernel = new Kernel();
@@ -181,7 +176,7 @@ final class Container implements ContainerInterface
 
             $type = $parameter->getType();
 
-            $typeName = $type ? $type->getName() : null;
+            $typeName = $type?->getName();
 
             $name = $parameter->getName();
 

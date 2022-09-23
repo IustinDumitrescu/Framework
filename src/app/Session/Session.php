@@ -14,7 +14,7 @@ use App\Interfaces\SessionInterface;
 final class Session implements SessionInterface
 {
 
-    private $isStarted = false;
+    private bool $isStarted = false;
 
 
     /**

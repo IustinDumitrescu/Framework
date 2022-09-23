@@ -22,7 +22,7 @@ class LoginFirewall
     /**
      * @var ContainerInterface
      */
-    private $container;
+    private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
@@ -52,23 +52,25 @@ class LoginFirewall
 
             $sanitizeEmail = filter_var( $contentOfLoginData["email"], FILTER_SANITIZE_EMAIL);
 
-            $user = $userRepository->findBy(UserEntity::class, ["email" => $sanitizeEmail]);
+            $userArray = $userRepository->findBy(UserEntity::class, ["email" => $sanitizeEmail]);
 
-            if ($user) {
+            $user = $userArray[0] ?? null;
 
-               $passwordInput = trim(filter_var($contentOfLoginData["password_login"],FILTER_SANITIZE_STRING));
+            if (!empty($user)) {
+
+               $passwordInput = trim(filter_var($contentOfLoginData["password_login"],FILTER_SANITIZE_FULL_SPECIAL_CHARS));
 
                if (password_verify($passwordInput, $user->getHashPass())) {
                    $session->set('user', $user);
 
                    $request->cookie->setCookie('u_s_r_d', $user->getId(), [
-                      "expires" => time() + 1800,
+                       "expires" => time() + 3600,
                        "path" => '/',
                        "secure" => true,
                        "httponly" => true
                    ]);
 
-                   return $controller->redirect('/');
+                  return $controller->redirect('/');
                }
                return $controller->redirectToRoute('/login', [
                         "flashString" => "parolagresita",
@@ -101,9 +103,12 @@ class LoginFirewall
 
             $sanitizeEmail = filter_var($contentOfLoginData["email"], FILTER_SANITIZE_EMAIL);
 
-            $user = $userRepository->findBy(UserEntity::class, ["email" => $sanitizeEmail]);
+            $arrayOfUser = $userRepository->findBy(UserEntity::class, ["email" => $sanitizeEmail]);
 
-            if ($user && $controller->isAdmin($session, $user)) {
+            $user = $arrayOfUser[0] ?? null;
+
+            if (!empty($user) && $controller->isAdmin($session, $user)) {
+
                 $passwordInput = trim(filter_var($contentOfLoginData["password_login"],FILTER_SANITIZE_STRING));
 
                 if (password_verify($passwordInput, $user->getHashPass())) {
@@ -121,7 +126,9 @@ class LoginFirewall
 
                     $adminRepository = $this->container->get(AdminRepository::class);
 
-                    $admin = $adminRepository->findBy(AdminEntity::class, ['user_id' => $user->getId()]);
+                    $adminArray = $adminRepository->findBy(AdminEntity::class, ['user_id' => $user->getId()]);
+
+                    $admin = $adminArray[0] ?? null;
 
                     $session->set('admin', $admin);
 

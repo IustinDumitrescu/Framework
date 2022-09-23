@@ -3,13 +3,15 @@ namespace App\Repository;
 
 use App\Database\Database;
 use App\Interfaces\EntityManagerInterface;
+use App\Utils\Utils;
 use ReflectionClass;
+use ReflectionException;
 
 
 class EntityManager implements EntityManagerInterface
 {
 
-    public function getConnection(): \mysqli
+    protected function getConnection(): \mysqli
     {
         return (new Database())->getConnection();
     }
@@ -34,7 +36,30 @@ class EntityManager implements EntityManagerInterface
 
     }
 
-    public function findBy(string $entityName , array $criteries)
+    public function findAll(string $entityName): array
+    {
+        $table = $entityName::TableName;
+
+        $con = $this->getConnection();
+
+        $sql = "SELECT * from {$table}";
+
+        $stmt = $con->prepare($sql);
+
+        $stmt->execute();
+
+        $results = [];
+
+        $result = $stmt->get_result();
+
+        foreach ($result as $item) {
+            $results[] = $this->hydrate($item, $entityName);
+        }
+
+        return $results;
+    }
+
+    public function findBy(string $entityName , array $criteries): array
     {
         $table = $entityName::TableName;
 
@@ -59,15 +84,54 @@ class EntityManager implements EntityManagerInterface
 
         $stmt->execute();
 
-        $result = $stmt->get_result()->fetch_assoc();
+        $result = $stmt->get_result();
 
-        if ($result !== null) {
-            return $this->hydrate($result, $entityName);
+        $results = [];
+
+        foreach ($result as $item) {
+            $results[] = $this->hydrate($item, $entityName);
         }
 
-        return null;
+        return $results;
     }
 
+    public function findMultipleBy(string $entityName , array $criteries) : array
+    {
+        $table = $entityName::TableName;
+
+        $con = $this->getConnection();
+
+        $sql = "SELECT * FROM {$table} WHERE ";
+
+        $i = 0;
+
+        foreach ($criteries as $key => $criteria) {
+            if ($i === 0) {
+                $sql .= "{$key} = '{$criteria}'";
+            } else {
+                $sql .= "AND {$key} = '{$criteria}'";
+            }
+            $i++;
+        }
+
+        $stmt = $con->prepare($sql);
+
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $results = [];
+
+        foreach ($result as $item) {
+            $results[] = $this->hydrate($item, $entityName);
+        }
+
+        return $results;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
     public function persist($object): string
     {
        $class = get_class($object);
@@ -95,12 +159,11 @@ class EntityManager implements EntityManagerInterface
        $valuesForQuery = [];
 
        foreach ($properties as $property) {
-           $camelCasePropriety = 'get'.$this->dashesToCamelCase($property, true);
+           $camelCasePropriety = 'get'.Utils::dashesToCamelCase($property, true);
 
            if ($property !== 'id' && method_exists($object, $camelCasePropriety)) {
                $valuesForQuery[$property] = $object->$camelCasePropriety();
            }
-
        }
 
        return $this->getInsertQuery($valuesForQuery, $table);
@@ -109,32 +172,21 @@ class EntityManager implements EntityManagerInterface
 
     /**
      * @param array $result
-     * @param $entityName
+     * @param string $entityName
      * @return mixed
      */
-    public function hydrate(array $result, string $entityName)
+    public function hydrate(array $result, string $entityName): mixed
     {
         $class = new $entityName();
 
         foreach ($result as $key => $value) {
 
-            $camelCasePropriety = 'set'.$this->dashesToCamelCase($key, true);
+            $camelCasePropriety = 'set'.Utils::dashesToCamelCase($key, true);
 
             $class->$camelCasePropriety($value);
         }
 
         return $class;
-    }
-
-    private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
-    {
-        $str = str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
-
-        if (!$capitalizeFirstCharacter) {
-            $str[0] = strtolower($str[0]);
-        }
-
-        return $str;
     }
 
     private function getColumnsOfInformationSchema(string $tableName): array
@@ -169,18 +221,20 @@ class EntityManager implements EntityManagerInterface
 
 
         foreach ($propertiesAndValues as $property => $value) {
-            $columns .= $property.',';
+            $columns .= $property . ',';
 
-            $values .= "'$value'".',';
+            if ($value) {
+                $values .= "'$value'" . ',';
+            } else {
+                $values .= "NULL,";
+            }
         }
 
         $newColumns = rtrim($columns,',');
 
         $newValues = rtrim($values, ',');
 
-
         $sql .= $newColumns.')'.' VALUES ('.$newValues.')';
-
 
         return $sql;
 
@@ -194,6 +248,11 @@ class EntityManager implements EntityManagerInterface
         $stmt = $con->prepare($sql);
 
         $stmt->execute();
+    }
+
+    public function createQueryBuilder(): QueryBuilder
+    {
+        return new QueryBuilder();
     }
 
 

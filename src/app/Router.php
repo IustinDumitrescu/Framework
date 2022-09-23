@@ -10,24 +10,24 @@ use App\Utils\Utils;
 final class Router
 {
 
-    private $uri = [];
+    private array $uri = [];
 
-    private $method = [];
+    private array $method = [];
 
-    private $controller = [];
+    private array $controller = [];
 
-    private $slug = [];
+    private array $slug = [];
 
-    private $newSlug = [];
+    private array $newSlug = [];
 
     /**
      * @var Container
      */
-    private $container;
+    private Container $container;
     /**
      * @var Request
      */
-    private $request;
+    private Request $request;
 
     /**
      * Router constructor.
@@ -58,7 +58,7 @@ final class Router
      * @param array $slug
      * @return Router
      */
-    public function add($uri, $controller = null, $method = null, $slug = []): self
+    public function add($uri, $controller = null, $method = null, array $slug = []): self
     {
         $this->uri[] = $uri;
 

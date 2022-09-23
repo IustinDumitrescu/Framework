@@ -87,22 +87,13 @@ final class HomeService
 
         $secondNr = (float)$dataSubmitted["second_number"];
 
-        switch ($dataSubmitted["operation"]) {
-            case "+":
-                return round($firstNr + $secondNr, 2);
-                break;
-            case "-":
-                return round($firstNr - $secondNr,2);
-                break;
-            case "*":
-                return round($firstNr * $secondNr,2);
-                break;
-            case "/":
-                return round($firstNr / $secondNr,2);
-                break;
-        }
-
-        return null;
+        return match ($dataSubmitted["operation"]) {
+            "+" => round($firstNr + $secondNr, 2),
+            "-" => round($firstNr - $secondNr, 2),
+            "*" => round($firstNr * $secondNr, 2),
+            "/" => round($firstNr / $secondNr, 2),
+            default => null,
+        };
 
     }
 

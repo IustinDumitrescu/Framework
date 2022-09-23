@@ -9,10 +9,21 @@
 namespace App\Entity;
 
 
+use DateTime;
+
 class AdminEntity
 {
 
     public const TableName = 'admin';
+
+    public const RolVanzator = 'vanzator';
+
+    public const RolNewsletter = 'newsletter';
+
+    public const Roluri = [
+        self::RolVanzator,
+        self::RolNewsletter
+    ];
 
     private ?int $id;
 
@@ -22,52 +33,44 @@ class AdminEntity
 
     private ?bool $super_admin;
 
-    private $created_at;
+    private null|string|DateTime $created_at;
 
-    private $updated_at;
+    private null|string|DateTime $updated_at = null;
 
-    /**
-     * @return mixed
-     */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
     /**
-     * @param mixed $id
+     * @param int $id
      * @return AdminEntity
      */
-    public function setId($id): self
+    public function setId(int $id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUserId()
+
+    public function getUserId(): ?int
     {
         return $this->user_id;
     }
 
     /**
-     * @param mixed $user_id
+     * @param int $user_id
      * @return AdminEntity
      */
-    public function setUserId($user_id): self
+    public function setUserId(int $user_id): self
     {
         $this->user_id = $user_id;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getRol()
+    public function getRol() :string
     {
         return $this->rol;
     }
@@ -76,64 +79,56 @@ class AdminEntity
      * @param mixed $rol
      * @return AdminEntity
      */
-    public function setRol($rol): self
+    public function setRol(string $rol): self
     {
         $this->rol = $rol;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getSuperAdmin()
+    public function getSuperAdmin(): ?bool
     {
-        return $this->super_admin;
+         return $this->super_admin;
     }
 
     /**
      * @param mixed $super_admin
      * @return AdminEntity
      */
-    public function setSuperAdmin($super_admin): self
+    public function setSuperAdmin(bool $super_admin): self
     {
         $this->super_admin = $super_admin;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getCreatedAt()
+    public function getCreatedAt(): DateTime|string|null
     {
         return $this->created_at;
     }
 
     /**
-     * @param mixed $created_at
+     * @param string|DateTime|null $created_at
      * @return AdminEntity
      */
-    public function setCreatedAt($created_at): self
+    public function setCreatedAt(null|string|DateTime $created_at): self
     {
         $this->created_at = $created_at;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUpdatedAt()
+    public function getUpdatedAt(): DateTime|string|null
     {
         return $this->updated_at;
     }
 
     /**
-     * @param mixed $updated_at
+     *
+     * @param string|DateTime|null $updated_at
      * @return AdminEntity
      */
-    public function setUpdatedAt($updated_at): self
+    public function setUpdatedAt(null|string|DateTime $updated_at): self
     {
         $this->updated_at = $updated_at;
 

@@ -15,7 +15,7 @@ use App\Http\Request;
 final class Kernel
 {
 
-    private $files = [];
+    private array $files = [];
 
 
     public function getAppDir(): string
@@ -36,7 +36,7 @@ final class Kernel
      */
     public function getAppFiles(): array
     {
-        $scandir = scandir($this->getAppDir());
+         $scandir = scandir($this->getAppDir());
 
          $this->checkIfDir($scandir, $this->getAppDir());
 
@@ -72,7 +72,7 @@ final class Kernel
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \ReflectionException
      */
-    public function run()
+    public function run(): mixed
     {
         $container = new Container();
 
@@ -101,7 +101,6 @@ final class Kernel
         ) {
             $firewall->checkAdminLogin($request);
         }
-
 
         return (new Router($container, $request))->submit();
     }
