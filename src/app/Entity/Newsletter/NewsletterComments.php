@@ -6,6 +6,24 @@ use DateTime;
 
 class NewsletterComments
 {
+
+    /**
+    CREATE TABLE `newsletter_comments` (
+        `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+        `id_newsletter` mediumint(9) NOT NULL,
+        `id_user` int(9) NOT NULL,
+        `comentariu` varchar(255) NOT NULL,
+        `created_at` timestamp NULL DEFAULT NULL,
+        `updated_at` timestamp NULL DEFAULT NULL,
+        PRIMARY KEY (`id`),
+        KEY `fk_user` (`id_user`),
+        KEY `fk_newsletter` (`id_newsletter`),
+        CONSTRAINT `fk_newsletter` FOREIGN KEY (`id_newsletter`) REFERENCES `newsletter_content` (`id`),
+        CONSTRAINT `fk_user` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4
+     */
+
+
     public const TableName = 'newsletter_comments';
 
     /**

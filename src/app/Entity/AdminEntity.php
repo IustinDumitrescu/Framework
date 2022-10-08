@@ -13,6 +13,19 @@ use DateTime;
 
 class AdminEntity
 {
+    /**
+    CREATE TABLE `admin` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `user_id` int(11) NOT NULL,
+        `rol` varchar(255) NOT NULL,
+        `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+        `updated_At` datetime DEFAULT NULL,
+        `super_admin` tinyint(1) DEFAULT NULL,
+        PRIMARY KEY (`id`),
+        KEY `FOREIGN` (`user_id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4
+
+     */
 
     public const TableName = 'admin';
 

@@ -5,6 +5,25 @@ namespace App\Entity;
 
 class UserEntity
 {
+    /*
+    CREATE TABLE `user` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `first_name` varchar(255) NOT NULL,
+          `last_name` varchar(255) NOT NULL,
+          `age` mediumint(9) DEFAULT NULL,
+          `email` varchar(255) DEFAULT NULL,
+          `telefon` varchar(255) DEFAULT NULL,
+          `ip_register` varchar(255) NOT NULL,
+          `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+          `hash_pass` varchar(255) DEFAULT NULL,
+          `img_prin` varchar(255) NOT NULL,
+          PRIMARY KEY (`id`),
+          KEY `email` (`email`)
+     ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4
+     *
+     *
+     * */
+
     public const TableName = 'user';
 
     private $id;

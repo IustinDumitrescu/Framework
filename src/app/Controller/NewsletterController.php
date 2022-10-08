@@ -292,10 +292,7 @@ class NewsletterController extends AbstractController
                     }
                 }
             }
-
-            die();
         }
-
         die();
     }
 

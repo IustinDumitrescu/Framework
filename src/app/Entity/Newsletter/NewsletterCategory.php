@@ -4,6 +4,19 @@ namespace App\Entity\Newsletter;
 
 class NewsletterCategory
 {
+
+    /**
+     CREATE TABLE `newslettercategory` (
+        `id` mediumint(11) NOT NULL AUTO_INCREMENT,
+        `denumire` varchar(255) NOT NULL,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+        `updated_at` timestamp NULL DEFAULT NULL,
+        `slug` varchar(255) NOT NULL,
+        PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4
+     */
+
+
      public const TableName = 'newslettercategory';
 
      private ?int $id;

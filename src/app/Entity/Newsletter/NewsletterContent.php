@@ -6,6 +6,23 @@ use DateTime;
 
 class NewsletterContent
 {
+
+    /**
+    CREATE TABLE `newsletter_content` (
+        `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+        `id_categorie` mediumint(9) NOT NULL,
+        `titlu` varchar(255) NOT NULL,
+        `content` text NOT NULL,
+        `created_at` timestamp NULL DEFAULT NULL,
+        `updated_at` timestamp NULL DEFAULT NULL,
+        `img_prin` varchar(255) NOT NULL,
+        `slug` varchar(255) NOT NULL,
+        PRIMARY KEY (`id`),
+        KEY `fk_category` (`id_categorie`),
+        CONSTRAINT `fk_category` FOREIGN KEY (`id_categorie`) REFERENCES `newslettercategory` (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4
+     */
+
     public const TableName = 'newsletter_content';
 
     private ?int $id;
