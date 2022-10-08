@@ -63,11 +63,11 @@ class DashboardCrudController extends AbstractCrudController
                 AdminDashboardField::new('Admini',AdminCrudController::class, [
                     "SUPER-ADMIN"
                 ], 'fa-solid fa-users')
-                    ->new('NewsletterCategory', NewsletterCategoryCrudController::class, [
+                    ->new('Newsletter Category', NewsletterCategoryCrudController::class, [
                         "SUPER-ADMIN",
                         "newsletter"
                     ], 'fa fa-circle-info')
-                    ->new('NewsletterContent',NewsletterContentCrudController::class,
+                    ->new('Newsletter Content',NewsletterContentCrudController::class,
                         [
                             "SUPER-ADMIN",
                             "newsletter"

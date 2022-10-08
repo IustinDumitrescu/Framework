@@ -179,7 +179,7 @@ final class AdminTemplate
 
       $this->actionTemplate .= "<th></th></thead>";
 
-      foreach ($context->getResponseFromAction() as $entity) {
+      foreach ($context->getResponseFromAction()["items"] as $entity) {
           $this->actionTemplate .= "<tr>";
 
           foreach ($context->getFields() as $field) {
@@ -194,7 +194,7 @@ final class AdminTemplate
                         <img src='{$entity->$name()}' width='100px' height='100ox' alt='img_ls'>    
                 </td>";
             } else {
-                $this->actionTemplate .= "<td>" . substr($entity->$name(), 0, 200) . "</td>";
+                $this->actionTemplate .= "<td>" . strip_tags(substr($entity->$name(), 0, 200)) . "</td>";
             }
 
           }
@@ -216,36 +216,38 @@ final class AdminTemplate
 
       $this->actionTemplate .= "</table>";
 
-      $countOfResults = count($context->getResponseFromAction());
+      $countOfResults = $context->getResponseFromAction()["count"][0]["count"];
 
-      $nrOfPages = round($countOfResults/20);
+      $nrOfPages = (int)number_format(round($countOfResults/16), 0);
 
       if ($nrOfPages > 1) {
 
           $this->actionTemplate .= "<div class='pagination d-flex m-3 justify-content-center'>";
 
-          $page = $context->getRequest()->query->get("page");
+          $page = (int)$context->getRequest()->query->get("page");
 
           if (!$page) {
-              $page = 1;
+              $page = 0;
           }
 
-          $z = $page > 1 ? $page - 1 : 1;
+          $z = $page > 0 ? $page - 1 : 1;
 
           $w = $page >= $nrOfPages ? $page : $page + 1;
 
-          $this->actionTemplate .= "<a href='" . $context->getCurrentRequest() . "&page=$z" . "'>$z</a>";
+          $urlIndex = DashboardCrudController::rootUrl."?crudCon=".$context->getControllerName().
+              "&action=index&signature=".AdminUtils::createSignatureUrl($context->getAdmin(), AdminContext::AdminActionIndex);
+
+          $this->actionTemplate .= "<a href='" . $urlIndex . "&page=$z" . "'>back</a>";
 
           for ($i = 0; $i <= $nrOfPages; $i++) {
-
-              if ($i = $page) {
+              if ($i === $page) {
                   $this->actionTemplate .= "<a class='active' href='#'>$i</a>";
               } else {
-                  $this->actionTemplate .= "<a href='" . $context->getCurrentRequest() . "&page=$i" . "'>$i</a>";
+                  $this->actionTemplate .= "<a href='" . $urlIndex . "&page=$i" . "'>$i</a>";
               }
           }
 
-          $this->actionTemplate .= "<a href='" . $context->getCurrentRequest() . "&page=$w" . "'>$w</a>";
+          $this->actionTemplate .= "<a href='" . $urlIndex . "&page=$w" . "'>next</a>";
 
           $this->actionTemplate .= "</div>";
       }

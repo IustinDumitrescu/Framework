@@ -36,6 +36,7 @@
                       $formRegister["email"].
                       $formRegister["password_register"].
                       $formRegister["confirm_password"].
+                      $formRegister["imagPrin"].
                     "</div> 
                     <div>".
                     $formRegister["telefon"].
@@ -53,5 +54,12 @@
         </div>
             </div>
         </div>
+    <script src="../js/showFileInput.js"></script>
+
+<script>
+        $(document).ready(() => {
+            bsCustomFileInput.init();
+        });
+</script>
 
 <?php include 'globals/footer.php'?>

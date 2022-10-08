@@ -10,6 +10,8 @@ class NewsletterCategory
 
      private ?string $denumire;
 
+     private ?string $slug;
+
      private null|string|\DateTime $created_at;
 
      private null|string|\DateTime $updated_at = null;
@@ -83,6 +85,24 @@ class NewsletterCategory
     public function setUpdatedAt(\DateTime|string|null $updated_at): self
     {
         $this->updated_at = $updated_at;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param string|null $slug
+     * @return NewsletterCategory
+     */
+    public function setSlug(?string $slug): self
+    {
+        $this->slug = $slug;
         return $this;
     }
 

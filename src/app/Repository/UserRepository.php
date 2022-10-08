@@ -11,15 +11,17 @@ class UserRepository extends EntityManager
     {
         $user = new UserEntity();
 
-        $user->setFirstName($filteredData["first_name"])
-             ->setLastName($filteredData["last_name"])
-             ->setAge($filteredData["age"])
-             ->setEmail($filteredData["email"])
-             ->setAddress($filteredData["adresa"])
-             ->setTelefon($filteredData["telefon"])
-             ->setIpRegister($filteredData["ip_register"])
-             ->setHashPass($filteredData["hash_pass"])
-             ->setCreatedAt((new \DateTime('now'))->format('Y-m-d'));
+        $user
+            ->setFirstName($filteredData["first_name"])
+            ->setLastName($filteredData["last_name"])
+            ->setAge($filteredData["age"])
+            ->setEmail($filteredData["email"])
+            ->setAddress($filteredData["adresa"])
+            ->setTelefon($filteredData["telefon"])
+            ->setIpRegister($filteredData["ip_register"])
+            ->setHashPass($filteredData["hash_pass"])
+            ->setImgPrin($filteredData["img_prin"])
+            ->setCreatedAt((new \DateTime('now'))->format('Y-m-d'));
 
          $query = $this->persist($user);
 

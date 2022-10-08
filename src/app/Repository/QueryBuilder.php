@@ -6,6 +6,13 @@ use http\Exception\RuntimeException;
 
 final class QueryBuilder extends EntityManager
 {
+
+    public const Select = 'select';
+
+    public const Update = 'update';
+
+    public const Delete = 'delete';
+
     private const Operations = [
         'select',
         'update',
@@ -31,6 +38,8 @@ final class QueryBuilder extends EntityManager
     private array $propertiesOfUpdate = [];
 
     private array $propertiesValuesOfUpdate = [];
+
+    private ?string $orderBy = null;
 
     public function setOperation(string $operationName): QueryBuilder
     {
@@ -90,13 +99,18 @@ final class QueryBuilder extends EntityManager
         return $this;
     }
 
+
     private function getSelectQuery(): string
     {
         $query = "SELECT ";
 
         if (!empty($this->inputsOfSelect)) {
             foreach ($this->inputsOfSelect as $item) {
-                $query .= $this->entityName::TableName.".".$item . ",";
+                if (str_contains($item, 'count')) {
+                    $query .= "count(".$this->entityName::TableName. ".id) as count";
+                } else {
+                    $query .= $this->entityName::TableName . "." . $item . ",";
+                }
             }
         } else {
             $query .= '*';
@@ -121,6 +135,10 @@ final class QueryBuilder extends EntityManager
             foreach ($this->conditions as $condition) {
                 $query .= " AND ".$condition;
             }
+        }
+
+        if ($this->orderBy) {
+            $query .= $this->orderBy;
         }
 
         return $query;
@@ -165,9 +183,7 @@ final class QueryBuilder extends EntityManager
         foreach ($result as $item) {
             $results[] = $item;
         }
-
         return  $results;
-
     }
 
     public function update(string $class): self
@@ -248,8 +264,13 @@ final class QueryBuilder extends EntityManager
                 $query .= " AND ".$condition;
             }
         }
-
         return $query;
+    }
+
+    public function orderBy(string $field, string $value): self
+    {
+        $this->orderBy = " ORDER BY $field $value ";
+        return $this;
     }
 
 

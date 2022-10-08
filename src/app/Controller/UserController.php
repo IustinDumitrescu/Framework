@@ -34,8 +34,9 @@ class UserController extends AbstractController
 
         if ($formRegister->isSubmitted() && $formRegister->isValid()) {
             $dataSubmitted = $formRegister->getData();
+            $files = $request->files->all();
 
-            $getOperationSuccessString = $userService->createUser($dataSubmitted);
+            $getOperationSuccessString = $userService->createUser($dataSubmitted, $files);
 
             $templateVars["flash"] = [
                 "flashString" => $getOperationSuccessString,

@@ -10,6 +10,7 @@ use App\Http\Request;
 use App\Interfaces\EntityManagerInterface;
 use App\Interfaces\SessionInterface;
 use App\Repository\EntityManager;
+use App\Utils\Utils;
 use Psr\Container\ContainerInterface;
 
 abstract class AbstractController implements ControllerInterface
@@ -52,6 +53,16 @@ abstract class AbstractController implements ControllerInterface
         return ob_get_clean();
    }
 
+   public function createApiToken(SessionInterface $session, string $name): string
+   {
+       $token = Utils::createCsrfToken();
+
+       $session->set($name, $token);
+
+       return $token;
+   }
+
+
    public function initializeLayout(
        SessionInterface $session,
        Request $request,
@@ -65,7 +76,6 @@ abstract class AbstractController implements ControllerInterface
        }
 
        if ($mustBeLogged !== null) {
-
            if (!$mustBeLogged && $this->isLoggedIn($session, $request)) {
                $this->redirectToRoute('/');
            }
@@ -73,8 +83,8 @@ abstract class AbstractController implements ControllerInterface
            if ($mustBeLogged && !$this->isLoggedIn($session, $request)) {
                $this->redirectToRoute('/login');
            }
-
        }
+       $templateVars["currentUrl"] = $request->getHost();
 
        $templateVars["logged"] = $this->isLoggedIn($session, $request);
 
@@ -125,9 +135,7 @@ abstract class AbstractController implements ControllerInterface
           if ($url[strlen($url)-1] === '&') {
               $url = rtrim($url,'&');
           }
-
        }
-
        header($url,true, 302);
    }
 

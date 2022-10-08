@@ -29,6 +29,8 @@ class UserEntity
 
     private $createdAt;
 
+    private ?string $img_prin = null;
+
 
     /**
      * For UserClass task
@@ -257,6 +259,24 @@ class UserEntity
     {
         $this->address = $address;
 
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getImgPrin(): ?string
+    {
+        return $this->img_prin;
+    }
+
+    /**
+     * @param string|null $img_prin
+     * @return UserEntity
+     */
+    public function setImgPrin(?string $img_prin): self
+    {
+        $this->img_prin = $img_prin;
         return $this;
     }
 

@@ -19,7 +19,6 @@ use App\Kernel;
 use App\Repository\EntityManager;
 use App\Service\MediaUploadService;
 use App\Service\NewsletterService;
-use App\Utils\Utils;
 
 class NewsletterContentCrudController extends AbstractCrudController
 {
@@ -89,8 +88,24 @@ class NewsletterContentCrudController extends AbstractCrudController
             ];
         }
 
+        $newsletter = $em->findBy(NewsletterContent::class,
+            [
+                "titlu" => filter_var($dataFromForm["titlu"], FILTER_SANITIZE_FULL_SPECIAL_CHARS)
+            ]
+        );
+
+        if (!empty($newsletter)) {
+            return [
+                "string" => "Newsletter-ul exista deja",
+                "value" => false
+            ];
+        }
+
         $newsletterContent
             ->setTitlu(filter_var($dataFromForm["titlu"], FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+
+        $newsletterContent
+            ->setSlug(str_replace(' ', '-', strtolower(trim(preg_replace('/[^A-Za-z0-9]/',' ',$newsletterContent->getTitlu())))));
 
         if (empty($dataFromForm["content"])) {
             return [
@@ -161,6 +176,54 @@ class NewsletterContentCrudController extends AbstractCrudController
         ];
     }
 
+    public function handleEdit(array $data, AdminContext $context, EntityManager $em, object $entity)
+    {
+        $arrayOfChanges = [];
+
+        $files = $context->getRequest()->files->all();
+
+        if (!empty($data["titlu"]) && $data["titlu"] !== $entity->getTitlu()) {
+            $arrayOfChanges["titlu"] = filter_var($data["titlu"], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $arrayOfChanges["slug"] = str_replace(' ', '-', strtolower(trim(preg_replace('/[^A-Za-z0-9]/',' ',$arrayOfChanges["titlu"]))));
+        }
+
+        if (!empty($data["content"]) && $data["content"] !== $entity->getContent()) {
+            $arrayOfChanges["content"] = $data["content"];
+        }
+
+        if (!empty($files["img_prin"])) {
+            $mediaUpload = new MediaUploadService(
+                $files["img_prin"]["size"],
+                2000000,
+                $files["img_prin"]["tmp_name"],
+                'upload/newsletter/imgArticol',
+                $files["img_prin"]["type"],
+                ['image/jpg', 'image/jpeg','image/png'],
+            );
+
+            $resultOfUpload = $mediaUpload->uploadFile();
+
+            if ($resultOfUpload === 'success') {
+                $arrayOfChanges["img_prin"] = $mediaUpload->getNewFile();
+                $mediaUpload->deleteFile(Kernel::getRootDirectory(). 'public/'.$entity->getImgPrin());
+            }
+        }
+
+        if (!empty($arrayOfChanges)) {
+            $newsletterService = $context->getContainer()->get(NewsletterService::class);
+
+            $newsletterService->updateBulkNewsletterContent($entity, $arrayOfChanges);
+        }
+
+        $this->redirectToRoute('/admin', [
+            "crudCon" => $context->getControllerName(),
+            "action" => AdminContext::AdminActionEdit,
+            "entityId" => $entity->getId(),
+            "signature" => $context->createSignatureUrl($context->getAdmin(), AdminContext::AdminActionEdit)
+        ]);
+    }
+
+
     public function configureFields(AdminContext $context): array
     {
         $newsletterService = $context->getContainer()->get(NewsletterService::class);
@@ -186,8 +249,10 @@ class NewsletterContentCrudController extends AbstractCrudController
         $titlu = new AdminListingField('Titlu', 'titlu', TextType::class, [
             "required" => true
         ]);
+
+        $slug = new AdminListingField('Slug', 'slug', TextType::class, []);
+
         $imgPrin = new AdminListingField('Imagine JPG,PNG,JPEG', 'img_prin', UploadableFieldType::class, [
-            "required" => true,
             "accept" => "image/*"
         ]);
 
@@ -200,7 +265,7 @@ class NewsletterContentCrudController extends AbstractCrudController
 
         return match ($context->getCurrentAction()->getName()) {
             AdminContext::AdminActionShow, AdminContext::AdminActionIndex => [
-                $id, $category, $titlu, $content,$imgPrin, $createdAt, $updatedAt
+                $id, $category, $titlu, $content,$imgPrin, $createdAt, $updatedAt, $slug
             ],
             AdminContext::AdminActionNew, AdminContext::AdminActionEdit => [
                 $category, $titlu, $content, $imgPrin

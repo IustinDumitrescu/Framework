@@ -9,6 +9,8 @@
 namespace App\Http;
 
 
+use App\Utils\Utils;
+
 class ParameterBag
 {
 
@@ -101,7 +103,6 @@ class ParameterBag
             $data = file_get_contents('php://input', false);
 
             $newData = array();
-
             $allData = array();
 
             parse_str($data, $newData);
@@ -119,6 +120,18 @@ class ParameterBag
         }
         return null;
     }
+
+    public function getJsonDataFromAjaxRequest()
+    {
+        if ($this->method === 'request') {
+            $data = file_get_contents('php://input', false);
+            if (Utils::checkIfJson($data)) {
+               return json_decode($data, true);
+            }
+        }
+        return null;
+    }
+
 
     public function setCookie(string $name, string $value , array $options = []): void
     {

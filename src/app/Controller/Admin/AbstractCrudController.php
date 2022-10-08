@@ -89,18 +89,27 @@ abstract class AbstractCrudController extends AbstractController
 
     public function index(AdminContext $context): array
     {
-        $queryBuilder = $this->getIndexQueryBuilder($context);
+        $indexMethod = $this->getIndexQueryBuilder($context);
 
-        return (new Pagination($queryBuilder, $context->getRequest()))
-            ->setItemsOnPage(20)
-            ->execute();
+        $request = $context->getRequest();
+
+        $pageRough = $request->query->get('page');
+
+        $page = !empty($pageRough) && filter_var($pageRough, FILTER_VALIDATE_INT) ? (int)$pageRough : 0;
+
+        return [
+            "items" => (new Pagination($indexMethod["qb"], $context->getRequest()))
+                ->setItemsOnPage(16)
+                ->executeByPage($page),
+            "count" => $indexMethod["count"]
+        ];
     }
 
     /**
      * @param AdminContext $context
      * @return array
      */
-    protected function getIndexQueryBuilder(AdminContext $context): QueryBuilder
+    protected function getIndexQueryBuilder(AdminContext $context): array
     {
         $fields = [];
 
@@ -110,10 +119,20 @@ abstract class AbstractCrudController extends AbstractController
 
         $em = $this->container->get(EntityManager::class);
 
-        return $em->createQueryBuilder()
+        $qb = $em->createQueryBuilder()
             ->setOperation('select')
             ->from($context->getController()->getEntityName())
+            ->orderBy('created_at', 'DESC')
             ->select($fields);
+
+        $count =  $em->createQueryBuilder()
+            ->setOperation('select')
+            ->from($context->getController()->getEntityName())
+            ->select(["count"])->getQuery()->getNormalResult();
+        return [
+            "qb" => $qb,
+            "count" => $count
+        ];
     }
 
     #[ArrayShape(["formBuilder" => "mixed", "flash" => "array|bool"])]
@@ -229,7 +248,7 @@ abstract class AbstractCrudController extends AbstractController
 
     }
 
-    protected function handleEdit(array $data, AdminContext $context, EntityManager $em, object $entity): ?array
+    protected function handleEdit(array $data, AdminContext $context, EntityManager $em, object $entity)
     {
         $valuesToEdit = [];
 
@@ -247,7 +266,6 @@ abstract class AbstractCrudController extends AbstractController
         }
 
         if (!empty($valuesToEdit)) {
-
             $queryBuilder = $em->createQueryBuilder()
                 ->setOperation('update')
                 ->update($context->getController()->getEntityName());
@@ -269,24 +287,12 @@ abstract class AbstractCrudController extends AbstractController
                 }
             }
 
-            $formAdminEdit = $this->createForm(AdminEditType::class,
-                [
-                    "name" => $context->getController()->getName(),
-                    "method" => "POST",
-                    "action" => $context->getCurrentRequest(),
-                    "id" => $context->getController()->getName()."FormEdit",
-                    "options" => []
-                ],
-                [
-                    "data" => $context->getFields()
-                ]
-            );
-
-            $flash["formBuilder"] = $formAdminEdit;
-            $flash["string"] = 'Update-ul a fost facut cu succes!';
-            $flash["value"] = true;
-
-            return $flash;
+            $this->redirectToRoute('/admin', [
+                "crudCon" => $context->getControllerName(),
+                "action" => AdminContext::AdminActionEdit,
+                "entityId" => $entity->getId(),
+                "signature" => $context->createSignatureUrl($context->getAdmin(), AdminContext::AdminActionEdit)
+            ]);
         }
 
         return null;

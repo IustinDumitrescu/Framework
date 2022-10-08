@@ -14,6 +14,7 @@ use App\Form\InputTypes\NumberType;
 use App\Form\InputTypes\PasswordType;
 use App\Form\InputTypes\SubmitType;
 use App\Form\InputTypes\TextType;
+use App\Form\InputTypes\UploadableFieldType;
 use App\Interfaces\FormBuilderInterface;
 
 class RegisterType extends AbstractType
@@ -39,12 +40,18 @@ class RegisterType extends AbstractType
             ->add("Confirm Password",'confirm_password',PasswordType::class, [
                 "required" => "required"
             ])
-            ->add("Age",'age',NumberType::class, [
-
-            ])
-            ->add("Phone",'telefon',TextType::class, [
-                "required" => "required"
-            ])
+            ->add("Age",'age',NumberType::class, [])
+            ->add("Phone",'telefon',TextType::class,
+                [
+                    "required" => "required"
+                ]
+            )
+            ->add('Adauga imagine', 'imagPrin',UploadableFieldType::class,
+                [
+                    "required" => true,
+                    "accept" => "image/*"
+                ]
+            )
             ->add("Address", 'adresa',TextType::class,[])
             ->add('Register','register_submit',SubmitType::class, []);
 

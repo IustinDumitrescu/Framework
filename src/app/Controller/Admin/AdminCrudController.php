@@ -103,14 +103,17 @@ class AdminCrudController extends AbstractCrudController
 
     /**
      * @param AdminContext $context
-     * @return QueryBuilder
+     * @return array
      */
-    public function getIndexQueryBuilder(AdminContext $context): QueryBuilder
+    public function getIndexQueryBuilder(AdminContext $context): array
     {
         $admin = $context->getAdmin();
 
-        return parent::getIndexQueryBuilder($context)
-            ->where("admin.id != {$admin->getId()}");
+        $indexMethod = parent::getIndexQueryBuilder($context);
+
+        $indexMethod["qb"]->where("admin.id != {$admin->getId()}");
+
+        return $indexMethod;
     }
 
 
@@ -192,7 +195,6 @@ class AdminCrudController extends AbstractCrudController
     {
         if ($this->isXmlHttpRequest($request) && $request->isMethod() === 'GET') {
             $data = $request->query->all();
-
             if (!empty($data)
                 && $this->isLoggedIn($session, $request) && $this->isAdmin($session)) {
                 $user = $this->getUser($session);

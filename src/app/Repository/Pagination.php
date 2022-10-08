@@ -24,6 +24,26 @@ class Pagination
         return $this;
     }
 
+    public function executeByPage(int $page = 0, bool $arrayForm = false): array
+    {
+        $this->queryBuilder->getQuery();
+
+        $query = $this->queryBuilder->getDql();
+
+        $offset = $page > 0 ? $page * $this->nrOfItemsOfPage : 0;
+
+        $query.= " LIMIT {$this->nrOfItemsOfPage} OFFSET {$offset}";
+
+        $this->queryBuilder->setDql($query);
+
+        if (!$arrayForm) {
+            return $this->queryBuilder->getResult();
+        }
+
+        return $this->queryBuilder->getNormalResult();
+    }
+
+
     public function execute(): array
     {
         $pageNr = $this->request->query->get('page');
@@ -31,7 +51,7 @@ class Pagination
         if (empty($pageNr)) {
             $pageNr = 0;
         } else {
-            $pageNr = $pageNr * $this->nrOfItemsOfPage -1;
+            $pageNr *= $this->nrOfItemsOfPage;
         }
 
         $this->queryBuilder->getQuery();
@@ -43,7 +63,6 @@ class Pagination
         $this->queryBuilder->setDql($query);
 
         return $this->queryBuilder->getResult();
-
     }
 
 

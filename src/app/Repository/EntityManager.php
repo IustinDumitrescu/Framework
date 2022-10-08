@@ -95,7 +95,7 @@ class EntityManager implements EntityManagerInterface
         return $results;
     }
 
-    public function findMultipleBy(string $entityName , array $criteries) : array
+    public function findMultipleBy(string $entityName , array $criteries, array $orderBy = []) : array
     {
         $table = $entityName::TableName;
 
@@ -112,6 +112,12 @@ class EntityManager implements EntityManagerInterface
                 $sql .= "AND {$key} = '{$criteria}'";
             }
             $i++;
+        }
+
+        if (!empty($orderBy)) {
+            foreach ($orderBy as $field => $value) {
+                $sql .= " ORDER BY $field $value ";
+            }
         }
 
         $stmt = $con->prepare($sql);
@@ -183,7 +189,9 @@ class EntityManager implements EntityManagerInterface
 
             $camelCasePropriety = 'set'.Utils::dashesToCamelCase($key, true);
 
-            $class->$camelCasePropriety($value);
+            if (method_exists($class, $camelCasePropriety)) {
+                $class->$camelCasePropriety($value);
+            }
         }
 
         return $class;

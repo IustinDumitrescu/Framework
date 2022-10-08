@@ -76,4 +76,11 @@ final class Utils
         return substr(md5(microtime()),random_int(0,26),9);
     }
 
+    public static function checkIfJson(string $string): bool
+    {
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
+
+
 }

@@ -18,6 +18,8 @@ class NewsletterContent
 
     private ?string $img_prin;
 
+    private ?string $slug;
+
     private null|string|DateTime $created_at;
 
     private null|string|DateTime $updated_at = null;
@@ -147,6 +149,25 @@ class NewsletterContent
         $this->img_prin = $img_prin;
         return $this;
     }
+
+    /**
+     * @return string|null
+     */
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param string|null $slug
+     * @return NewsletterContent
+     */
+    public function setSlug(?string $slug): self
+    {
+        $this->slug = $slug;
+        return $this;
+    }
+
 
 
 }

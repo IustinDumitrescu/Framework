@@ -39,4 +39,34 @@ Routes:
     controller: '\App\Controller\Admin\AdminCrudController'
     method: 'ajaxUserAutocomplete'
     slug: []
+  newsletterHome:
+    path: '/newsletter'
+    controller: '\App\Controller\NewsletterController'
+    method: 'newsletterHome'
+    slug: []
+  newsletterCategory:
+    path: '/newsletter/{slugCategorie}'
+    controller: '\App\Controller\NewsletterController'
+    method: 'newsletterOfCattegory'
+    slug: ["slugCategorie"]
+  newsletterShow:
+    path: '/newsletter/{slugCategorie}/{slugNewsletter}'
+    controller: '\App\Controller\NewsletterController'
+    method: 'newsletterShow'
+    slug: ["slugCategorie", "slugNewsletter"]
+  createNewsletterComments:
+    path: '/newsletter/{slugCategorie}/{slugNewsletter}/ajaxCreateNewsletterComments'
+    controller: '\App\Controller\NewsletterController'
+    method: 'createComment'
+    slug: ["slugCategorie", "slugNewsletter"]
+  getPageNewsletterComments:
+    path: '/newsletter/{slugCategorie}/{slugNewsletter}/ajaxGetDataOfComments'
+    controller: '\App\Controller\NewsletterController'
+    method: 'ajaxGetDataOfComments'
+    slug: ["slugCategorie", "slugNewsletter"]
+  getPageNewsletterCategory:
+    path: '/newsletter/{slugCategorie}/ajax/ajaxGetNewsletterOfCategory'
+    controller: '\App\Controller\NewsletterController'
+    method: 'getNewsletterOfCategoryPaginated'
+    slug: ["slugCategorie"]
 

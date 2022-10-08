@@ -70,7 +70,6 @@ final class Router
             $this->controller[] = $controller;
         }
 
-
         $this->slug[] = $slug;
 
         return $this;
@@ -85,7 +84,7 @@ final class Router
     {
        $this->createRoutes();
 
-       $getUriParam =$this->request->server->get('REQUEST_URI') ?? '/';
+       $getUriParam = $this->request->server->get('REQUEST_URI') ?? '/';
 
        foreach($this->uri as $key => $value) {
 
@@ -94,12 +93,15 @@ final class Router
                $arrayOfSlugDifference = explode( '/',Utils::get_string_diff($getUriParam, $this->uri[$key]));
 
                foreach ($this->slug[$key] as $keys => $difference) {
+                   if (str_contains($arrayOfSlugDifference[$keys], '?')) {
+                       $arrayOfSlugDifference[$keys] =
+                           substr($arrayOfSlugDifference[$keys], 0, strpos($arrayOfSlugDifference[$keys], '?'));
+                   }
 
                    $value = str_replace( '{'.$difference.'}', $arrayOfSlugDifference[$keys], $value);
 
                    $this->newSlug[$difference] = $arrayOfSlugDifference[$keys];
                }
-
             }
 
             $posOfVariable = strpos($getUriParam, '?');
@@ -117,10 +119,12 @@ final class Router
 
                     $slug = $this->newSlug;
 
-                    return call_user_func_array([$controller, $method], $this->container->getMethodsArgs(
+                    return call_user_func_array([$controller, $method],
+                        $this->container->getMethodsArgs(
                             $this->controller[$key],
                             $method,
-                            $slug)
+                            $slug
+                        )
                     );
 
                 }
@@ -131,10 +135,12 @@ final class Router
 
                 $slug = $this->newSlug;
 
-                return call_user_func_array([$controller, $method], $this->container->getMethodsArgs(
-                            $this->controller[$key],
-                            $method,
-                            $slug)
+                return call_user_func_array([$controller, $method],
+                    $this->container->getMethodsArgs(
+                        $this->controller[$key],
+                        $method,
+                        $slug
+                    )
                 );
             }
        }
