@@ -44,7 +44,7 @@ class DashboardCrudController extends AbstractCrudController
     private function configureDashboard($user)
     {
        return AdminDashboardConfigurator::configureForThisUser($user)
-            ->new(UserEntity::class)
+            ->new(UserEntity::class, 'SUPER_ADMIN')
             ->new(AdminEntity::class)
             ->getConfiguration();
 
