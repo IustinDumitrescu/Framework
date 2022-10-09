@@ -15,11 +15,11 @@ use App\Entity\UserEntity;
 class AdminDashboardConfigurator
 {
 
-    private static $dashboard_listing = [];
+    private static array $dashboard_listing = [];
 
-    private $urls_of_dashboard = [];
+    private array $urls_of_dashboard = [];
 
-    private static $user;
+    private static ?UserEntity $user;
 
 
     private function __construct()
@@ -54,7 +54,7 @@ class AdminDashboardConfigurator
         }
     }
 
-    public function getConfiguration()
+    public function getConfiguration(): static
     {
         $this->createUrlForAdmin();
         return $this;

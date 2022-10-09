@@ -5,9 +5,9 @@
         "simplon/mysql": "^2.2",
       "ext-mysqli": "*",
         "symfony/http-foundation": "^5.4",
-        "ext-yaml": "*",
       "ext-json": "*",
-      "ext-curl": "*"
+      "ext-curl": "*",
+      "ext-yaml": "*"
     },
     "autoload": {
     "psr-4": {

@@ -9,6 +9,9 @@
 namespace App\Form;
 
 
+use App\Form\InputTypes\EmailType;
+use App\Form\InputTypes\PasswordType;
+use App\Form\InputTypes\SubmitType;
 use App\Interfaces\FormBuilderInterface;
 
 class LoginType extends AbstractType
@@ -18,9 +21,13 @@ class LoginType extends AbstractType
         $builder->createHead($formHead);
 
         $builder
-            ->add('Username', 'email', 'email', ["required" => "required"])
-            ->add('Password', 'password_login','password', ["required" => "required"])
-            ->add('Login','login_submit','submit', []);
+            ->add('Username', 'email', EmailType::class, [
+                "required" => "required"
+            ])
+            ->add('Password', 'password_login',PasswordType::class, [
+                "required" => "required"
+            ])
+            ->add('Login','login_submit',SubmitType::class, []);
 
         return $builder;
 

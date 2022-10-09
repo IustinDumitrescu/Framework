@@ -10,24 +10,24 @@ use App\Utils\Utils;
 final class Router
 {
 
-    private $uri = [];
+    private array $uri = [];
 
-    private $method = [];
+    private array $method = [];
 
-    private $controller = [];
+    private array $controller = [];
 
-    private $slug = [];
+    private array $slug = [];
 
-    private $newSlug = [];
+    private array $newSlug = [];
 
     /**
      * @var Container
      */
-    private $container;
+    private Container $container;
     /**
      * @var Request
      */
-    private $request;
+    private Request $request;
 
     /**
      * Router constructor.
@@ -42,7 +42,7 @@ final class Router
 
     public function createRoutes(): void
     {
-        $routes = yaml_parse_file(Kernel::getRootDirectory().'config/routing/routing.yaml');
+        $routes = yaml_parse_file(Kernel::getRootDirectory().'Config/routing/routing.yaml');
 
         foreach ($routes["Routes"] as $route) {
             $this->add($route["path"], $route["controller"], $route["method"], $route["slug"]);
@@ -58,7 +58,7 @@ final class Router
      * @param array $slug
      * @return Router
      */
-    public function add($uri, $controller = null, $method = null, $slug = []): self
+    public function add($uri, $controller = null, $method = null, array $slug = []): self
     {
         $this->uri[] = $uri;
 
@@ -69,7 +69,6 @@ final class Router
         if ($controller !== null) {
             $this->controller[] = $controller;
         }
-
 
         $this->slug[] = $slug;
 
@@ -85,7 +84,7 @@ final class Router
     {
        $this->createRoutes();
 
-       $getUriParam =$this->request->server->get('REQUEST_URI') ?? '/';
+       $getUriParam = $this->request->server->get('REQUEST_URI') ?? '/';
 
        foreach($this->uri as $key => $value) {
 
@@ -94,12 +93,15 @@ final class Router
                $arrayOfSlugDifference = explode( '/',Utils::get_string_diff($getUriParam, $this->uri[$key]));
 
                foreach ($this->slug[$key] as $keys => $difference) {
+                   if (str_contains($arrayOfSlugDifference[$keys], '?')) {
+                       $arrayOfSlugDifference[$keys] =
+                           substr($arrayOfSlugDifference[$keys], 0, strpos($arrayOfSlugDifference[$keys], '?'));
+                   }
 
                    $value = str_replace( '{'.$difference.'}', $arrayOfSlugDifference[$keys], $value);
 
                    $this->newSlug[$difference] = $arrayOfSlugDifference[$keys];
                }
-
             }
 
             $posOfVariable = strpos($getUriParam, '?');
@@ -107,7 +109,7 @@ final class Router
             $positionOf = strpos($getUriParam, $value);
 
             if($posOfVariable !== false && $positionOf !== false
-                && preg_match_all("#$value(\?|\&)([^=]+)\=([^&]+)#i",$getUriParam)) {
+                && preg_match_all("#^$value(\?|\&)([^=]+)\=([^&]+)#i",$getUriParam)) {
 
                 if(isset($this->method[$key], $this->controller[$key])) {
 
@@ -117,10 +119,12 @@ final class Router
 
                     $slug = $this->newSlug;
 
-                    return call_user_func_array([$controller, $method], $this->container->getMethodsArgs(
+                    return call_user_func_array([$controller, $method],
+                        $this->container->getMethodsArgs(
                             $this->controller[$key],
                             $method,
-                            $slug)
+                            $slug
+                        )
                     );
 
                 }
@@ -131,10 +135,12 @@ final class Router
 
                 $slug = $this->newSlug;
 
-                return call_user_func_array([$controller, $method], $this->container->getMethodsArgs(
-                            $this->controller[$key],
-                            $method,
-                            $slug)
+                return call_user_func_array([$controller, $method],
+                    $this->container->getMethodsArgs(
+                        $this->controller[$key],
+                        $method,
+                        $slug
+                    )
                 );
             }
        }

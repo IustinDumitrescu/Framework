@@ -34,8 +34,9 @@ class UserController extends AbstractController
 
         if ($formRegister->isSubmitted() && $formRegister->isValid()) {
             $dataSubmitted = $formRegister->getData();
+            $files = $request->files->all();
 
-            $getOperationSuccessString = $userService->createUser($dataSubmitted);
+            $getOperationSuccessString = $userService->createUser($dataSubmitted, $files);
 
             $templateVars["flash"] = [
                 "flashString" => $getOperationSuccessString,
@@ -56,7 +57,8 @@ class UserController extends AbstractController
     {
         $templateVars = $this->initializeLayout($session, $request,false);
 
-        $flashString = filter_var($request->query->get('flashString'),FILTER_SANITIZE_STRING);
+
+        $flashString = filter_var($request->query->get('flashString'),FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
         $formLogin = $this->createForm(LoginType::class, [
            "name" => "Login Form",
@@ -65,23 +67,7 @@ class UserController extends AbstractController
            "id" => "form_login"
         ]);
 
-        if (!empty($flashString)) {
-
-            if ($flashString === 'nuexista') {
-                $flashStrings = 'User-ul nu exista';
-                $flashValue = false;
-            }
-
-            if ($flashString === 'parolagresita') {
-                $flashStrings = 'Parola este gresita';
-                $flashValue = false;
-            }
-
-            $templateVars["flash"] = [
-                "flashString" => $flashStrings,
-                "flashType" => $flashValue
-            ];
-        }
+        $templateVars = $this->getArr($flashString, $templateVars);
 
         $templateVars["formLogin"] = $formLogin->createView();
 
@@ -103,12 +89,13 @@ class UserController extends AbstractController
         $userCookie = $request->cookie->get('u_s_r_d');
 
         if ($userCookie) {
-            unset($userCookie);
+            unset($_COOKIE["u_s_r_d"]);
+            setcookie('u_s_r_d', '', time() - 3600, '/');
 
             $session->set('user', null);
         }
 
-        $this->redirectToRoute('/');
+        return $this->redirectToRoute('/');
     }
 
     /**
@@ -123,48 +110,54 @@ class UserController extends AbstractController
         Request $request
     )
     {
+        $templateVars = $this->initializeLayout($session, $request, null);
 
-        if ($this->isAdmin($session)) {
-
-            $templateVars = $this->initializeLayout($session, $request, null);
-
-            $flashString = filter_var($request->query->get('flashString'), FILTER_SANITIZE_STRING);
-
-            $formLoginAdmin = $this->createForm(LoginType::class, [
-                "name" => "login_admin_form",
-                "method" => "POST",
-                "action" => '',
-                "id" => "form_login_admin"
-            ]);
-
-
-            if (!empty($flashString)) {
-
-                if ($flashString === 'nuexista') {
-                    $flashStrings = 'User-ul nu exista';
-                    $flashValue = false;
-                }
-
-                if ($flashString === 'parolagresita') {
-                    $flashStrings = 'Parola este gresita';
-                    $flashValue = false;
-                }
-
-                $templateVars["flash"] = [
-                    "flashString" => $flashStrings,
-                    "flashType" => $flashValue
-                ];
-
-            }
-
-            $templateVars["formLoginAdmin"] = $formLoginAdmin->createView();
-
-            return $this->render('/admin/adminLogin', $templateVars);
+        if ($this->isAdmin($session) && $session->get('admin') !== null && $request->cookie->get('a_d_u_s_r') !== null) {
+            $this->redirect('/admin');
         }
 
-        return 'notadmin';
+        $flashString = filter_var($request->query->get('flashString'), FILTER_SANITIZE_STRING);
+
+        $formLoginAdmin = $this->createForm(LoginType::class, [
+            "name" => "login_admin_form",
+            "method" => "POST",
+            "action" => '',
+            "id" => "form_login_admin"
+        ]);
+
+
+        $templateVars = $this->getArr($flashString, $templateVars);
+
+        $templateVars["formLoginAdmin"] = $formLoginAdmin->createView();
+
+        return $this->render('/admin/adminLogin', $templateVars);
     }
 
+    /**
+     * @param mixed $flashString
+     * @param array $templateVars
+     * @return array
+     */
+    public function getArr(mixed $flashString, array $templateVars): array
+    {
+        if (!empty($flashString)) {
+            if ($flashString === 'nuexista') {
+                $flashStrings = 'User-ul nu exista';
+                $flashValue = false;
+            }
+
+            if ($flashString === 'parolagresita') {
+                $flashStrings = 'Parola este gresita';
+                $flashValue = false;
+            }
+
+            $templateVars["flash"] = [
+                "flashString" => $flashStrings,
+                "flashType" => $flashValue
+            ];
+        }
+        return $templateVars;
+    }
 
 
 }

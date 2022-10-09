@@ -12,6 +12,9 @@ namespace App\Utils;
 final class Utils
 {
 
+    /**
+     * @throws \Exception
+     */
     public static function createCsrfToken(): string
     {
         return bin2hex(random_bytes(32));
@@ -30,7 +33,7 @@ final class Utils
         return '\\A'.$newNameSpacePathOfClass;
     }
 
-    public static function get_string_diff($old, $new)
+    public static function get_string_diff($old, $new): string
     {
         $from_start = strspn($old ^ $new, "\0");
 
@@ -44,7 +47,7 @@ final class Utils
     /**
      * @return mixed|null
      */
-    public static function getIp()
+    public static function getIp(): mixed
     {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -56,5 +59,28 @@ final class Utils
 
         return $ip;
     }
+
+    public static function dashesToCamelCase($string, $capitalizeFirstCharacter = false): array|string
+    {
+        $str = str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
+
+        if (!$capitalizeFirstCharacter) {
+            $str[0] = strtolower($str[0]);
+        }
+
+        return $str;
+    }
+
+    public static function getRandomString(): string
+    {
+        return substr(md5(microtime()),random_int(0,26),9);
+    }
+
+    public static function checkIfJson(string $string): bool
+    {
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
+
 
 }

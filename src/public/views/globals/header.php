@@ -14,21 +14,22 @@
         <ul class="navbar-nav flex-row">
             <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="/calculator">Calculator</a></li>
+            <li class="nav-item"><a class="nav-link" href="/newsletter">Newsletter</a></li>
         </ul>
         <ul class="navbar-nav flex-row ml-md-auto">
             <?php if (!$logged) { ?>
-            <li class="nav-item"><a class=" nav-link" href="/login"><i class="fa-solid fa-right-to-bracket"></i>  Login</a></li>
+            <li class="nav-item"><a class="nav-link" href="/login"><i class="fa-solid fa-right-to-bracket"></i>  Login</a></li>
             <li class="nav-item"><a class="nav-item nav-link " href="/register"><i class="fa-solid fa-user"></i> Register</a></li>
             <?php } else { ?>
                 <li class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                       <?php echo $user->getEmail()?>
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img id="img_user" style="height: 40px; width: 40px; border-radius: 50%;" src="<?php echo $currentUrl. '/'. $user->getImgPrin();?>" alt="img_user">
+                            <?php echo $user->getEmail()?>
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <a class="dropdown-item" href="/logout">Logout</a>
                     </div>
                 </li>
-
             <?php }?>
         </ul>
     </div>

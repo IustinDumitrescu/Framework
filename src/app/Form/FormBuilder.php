@@ -2,55 +2,40 @@
 
 namespace App\Form;
 
+use App\Form\InputTypes\SubmitType;
+use App\Form\InputTypes\UploadableFieldType;
 use App\Http\Request;
 use App\Interfaces\FormBuilderInterface;
 use App\Session\Session;
 use App\Utils\Utils;
+use Exception;
 
 class FormBuilder implements FormBuilderInterface
 {
-    private $head = '';
+    private string $head = '';
 
-    private $body = [];
+    private array $body = [];
 
-    private $types = [];
+    private array $types = [];
 
-    private $method = '';
+    private string $method = '';
 
-    private $formId;
+    private string $formId;
 
-    private $formHead = [];
+    private array $formHead = [];
 
-    private $submitId;
+    private string $submitId;
     
-    private $arrayOfInputs = [];
+    private array $arrayOfInputs = [];
 
-    private $formInputs = [];
+    private array $formInputs = [];
 
-    private const Types = [
-        "checkbox",
-        "button",
-        "color",
-        "date",
-        "datetime-local",
-        "email",
-        "file",
-        "hidden",
-        "image",
-        "radio",
-        "search",
-        "submit",
-        "text",
-        "time",
-        "number",
-        "submit",
-        "choice",
-        "password"
-    ];
+    private bool $hasUploadableFiles = false;
+
     /**
      * @var Request
      */
-    private $request;
+    private Request $request;
 
     public function __construct(Request $request)
     {
@@ -58,25 +43,18 @@ class FormBuilder implements FormBuilderInterface
     }
 
 
-    public function createHead(
-        array $formHead = [
-            "name" => 'form',
-            "method" => 'POST',
-            "action" => '',
-            "id" => 'formId',
-            "options" => []
-        ]
-    )
+    /**
+     * @param array $formHead
+     * @return void
+     */
+    public function createHead(array $formHead): void
     {
-
         $headOptions = '';
 
         if (!empty($formHead["options"])) {
-
             foreach ($formHead["options"] as $key => $option) {
-                $headOptions .= " {$key} = '{$option}' ";
+                $headOptions .= " $key = '{$option}' ";
             }
-
         }
 
         $this->formHead = $formHead;
@@ -84,7 +62,6 @@ class FormBuilder implements FormBuilderInterface
         $this->method = $formHead["method"];
         
         $this->arrayOfInputs[] = $formHead["id"]; 
-
 
         $this->formId = $formHead["id"];
 
@@ -94,62 +71,28 @@ class FormBuilder implements FormBuilderInterface
 
     public function add(string $name, string $id , string $typeChosen, array $options): self
     {
-        foreach (self::Types as $type) {
+        $typeClass = new $typeChosen();
 
-            if ($typeChosen === $type ) {
+        $typeClass
+            ->setSetting($id, $name, $options);
 
-                
-                $this->arrayOfInputs[] = $id;
-                
-                if ($typeChosen === 'submit' && in_array($typeChosen, $this->types, true)) {
-                    return $this;
-                }
+        $this->arrayOfInputs[] = $typeClass->getId();
 
-                if ($typeChosen === 'submit') {
-                    $this->submitId = $id;
-                }
-
-                $stringOfOption = '';
-
-                foreach ($options as $key => $option) {
-                    if (!is_array($option)) {
-                        $stringOfOption .= " {$key} = '{$option}' ";
-                    }
-                }
-
-                if ($typeChosen === 'submit') {
-                    $input = "
-                    <button type=\"submit\" class=\"btn btn-primary text-center \" name='{$id}[{$id}]' id='{$id}' >{$name}</button> 
-                    ";
-                } else if ($typeChosen === 'choice') {
-                    $input = " 
-                     <div class=\"form-group\">
-                         <label for= '{$id}'>{$name}</label>
-                         <select  name='{$id}[{$id}]' id='{$id}' {$stringOfOption} class=\"form-control\">
-                    ";
-
-                    foreach ($options["choices"] as $key => $choice) {
-                        $input .= "<option value  =\"{$choice}\">$key</option>";
-                    }
-
-                    $input.= ' </select> </div>';
-
-                } else {
-                    $input = "
-                <div class='form-group'>
-                    <label for = '{$id}' class = 'form-label'>{$name}</label>
-                    <input type = '{$typeChosen}' id = '{$id}' name='{$id}[{$id}]' {$stringOfOption} class='form-control'>
-                </div>";
-                }
-
-                $this->formInputs[$id] = $input;
-
-                $this->body[] = $input;
-
-                $this->types[] = $typeChosen;
-            }
-
+        if ($typeChosen === SubmitType::class) {
+            $this->submitId = $typeClass->getId();
         }
+
+        if ($typeChosen === UploadableFieldType::class && !$this->hasUploadableFiles) {
+            $this->hasUploadableFiles = true;
+            $newHead = substr($this->head, 0, -2) . "enctype='multipart/form-data'>";
+            $this->head = $newHead;
+        }
+
+        $this->formInputs[$id] = $typeClass->getViewString();
+
+        $this->body[] = $typeClass->getViewString();
+
+        $this->types[] = $typeChosen;
 
         $this->arrayOfInputs[] = '_token';
 
@@ -157,6 +100,9 @@ class FormBuilder implements FormBuilderInterface
     }
 
 
+    /**
+     * @throws Exception
+     */
     public function createView(): array
     {
         $form = $this->head;
@@ -173,7 +119,7 @@ class FormBuilder implements FormBuilderInterface
             throw new \RuntimeException('Session was not started');
         }
 
-        $session->set((string)($this->formId), $token);
+        $session->set(($this->formId), $token);
 
         $form .= "\r\n<input type='hidden' id ='{$this->formHead["id"]}_token' name = '{$this->formHead["id"]}[_token]' value = '{$token}'>\r\n </form>";
 
@@ -184,16 +130,14 @@ class FormBuilder implements FormBuilderInterface
         $this->formInputs["form"] = $form;
 
         return $this->formInputs;
-
     }
 
     /**
-     * @return array|mixed|null
+     * @return array|null
      */
-    public function getData() :?array
+    public function getData(): ?array
     {
         if (isset($this->method)) {
-            
             if ($this->method === 'POST') {
                 return $this->request->request->getContent();
             }
@@ -201,7 +145,6 @@ class FormBuilder implements FormBuilderInterface
             if ($this->method === 'GET') {
                 return $this->request->query->all();
             }
-
         }
         return null;
     }
@@ -213,7 +156,7 @@ class FormBuilder implements FormBuilderInterface
         $session = new Session();
         
         $formData = $this->getData();
-        
+
         foreach ($formData as $inputId => $value) {
             if (!in_array($inputId, $this->arrayOfInputs, true)) {
                 return false;
@@ -221,7 +164,7 @@ class FormBuilder implements FormBuilderInterface
         }
 
         if (isset($formData[$idOfToken])) {
-            return  $session->get((string)($this->formId)) === $formData[$idOfToken];
+            return $session->get(($this->formId)) === $formData[$idOfToken];
         }
 
         return false;
@@ -230,15 +173,12 @@ class FormBuilder implements FormBuilderInterface
 
     public function isSubmitted() :bool
     {
-        if ($this->submitId !== null) {
-
+        if ($this->submitId) {
             if ($this->method === 'GET') {
                 return $this->request->query->get($this->submitId) !== null;
             }
-
             return $this->request->request->get($this->submitId) !== null;
         }
-
         return false;
     }
 

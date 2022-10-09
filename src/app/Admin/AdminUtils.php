@@ -9,11 +9,13 @@
 namespace App\Admin;
 
 
-class AdminUtils
+use App\Entity\AdminEntity;
+
+final class AdminUtils
 {
-    public static function createSignatureUrl($entity): string
+    public static function createSignatureUrl(AdminEntity $admin, string $action): string
     {
-        return md5(get_class($entity["class"]));
+        return md5($admin->getId().$action);
     }
 
 

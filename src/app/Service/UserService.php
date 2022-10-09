@@ -19,7 +19,7 @@ final class UserService
     /**
      * @var UserRepository
      */
-    private $userRepository;
+    private UserRepository $userRepository;
 
     public function __construct(UserRepository $userRepository)
     {
@@ -27,9 +27,13 @@ final class UserService
     }
 
 
-    public function createUser(array $dataInput): ?string
+    public function createUser(array $dataInput, array $files): ?string
     {
         $newData = [];
+
+        if (empty($files["imagPrin"])) {
+            return 'Imaginea nu poate fi goala';
+        }
 
         $newData["first_name"] = filter_var($dataInput["first_name"],FILTER_SANITIZE_STRING);
 
@@ -48,6 +52,23 @@ final class UserService
         $newData["age"] = filter_var($dataInput["age"],FILTER_VALIDATE_INT) ? $dataInput["age"] : null;
 
         $newData["ip_register"] = Utils::getIp();
+
+        $uploadedFile = new MediaUploadService(
+            $files["imagPrin"]["size"],
+            2000000,
+            $files["imagPrin"]["tmp_name"],
+            'upload/user',
+            $files["imagPrin"]["type"],
+            ['image/jpg', 'image/jpeg','image/png'],
+        );
+
+        $newImage = $uploadedFile->uploadFile();
+
+        if ($newImage !== 'success') {
+            return $newImage;
+        }
+
+        $newData["img_prin"] = $uploadedFile->getNewFile();
 
         if (!preg_match('/^(\+4|)?(07[0-8]{1}[0-9]{1}|02[0-9]{2}|03[0-9]{2}){1}?(\s|\.|\-)?([0-9]{3}(\s|\.|\-|)){2}$/', $dataInput["telefon"])) {
           return 'Telefonul nu este valid';
@@ -69,7 +90,7 @@ final class UserService
 
         $user = $this->userRepository->findBy(UserEntity::class,["email" => $newData["email"]]);
 
-        if ($user !== null) {
+        if (!empty($user)) {
             return 'Adresa de email este utilizata de un alt utilizator';
         }
 

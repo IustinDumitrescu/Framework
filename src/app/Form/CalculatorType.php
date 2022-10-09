@@ -9,6 +9,9 @@
 namespace App\Form;
 
 
+use App\Form\InputTypes\ChoiceType;
+use App\Form\InputTypes\NumberType;
+use App\Form\InputTypes\SubmitType;
 use App\Interfaces\FormBuilderInterface;
 use App\Service\HomeService;
 
@@ -20,21 +23,23 @@ class CalculatorType extends AbstractType
         $builder->createHead($formHead);
 
         $builder
-            ->add('First Number','first_number','number', [
+            ->add('First Number','first_number',NumberType::class, [
                 "required" => "required",
                 "step" => "0.01",
                 "value" => isset($options["data"]) ? $options["data"]["first_number"] : ''
             ])
-            ->add('Second Number', 'second_number','number', [
+            ->add('Second Number', 'second_number',NumberType::class, [
                 "required" => "required",
                 "step" => "0.01",
                 "value" => isset($options["data"]) ? $options["data"]["second_number"] : ''
             ])
-            ->add('Operation','operation','choice',[
+            ->add('Operation','operation',ChoiceType::class,[
                 "required" => "required",
                 "choices" => HomeService::CalculatorChoices
             ])
-            ->add('Calculate','calculate','submit',["required"]);
+            ->add('Calculate','calculate',SubmitType::class,[
+                "required"
+            ]);
 
         return $builder;
 

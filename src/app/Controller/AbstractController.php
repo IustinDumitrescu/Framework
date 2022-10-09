@@ -9,6 +9,8 @@ use App\Interfaces\ControllerInterface;
 use App\Http\Request;
 use App\Interfaces\EntityManagerInterface;
 use App\Interfaces\SessionInterface;
+use App\Repository\EntityManager;
+use App\Utils\Utils;
 use Psr\Container\ContainerInterface;
 
 abstract class AbstractController implements ControllerInterface
@@ -17,7 +19,7 @@ abstract class AbstractController implements ControllerInterface
     /**
      * @var ContainerInterface
      */
-    public $container;
+    protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
@@ -38,7 +40,7 @@ abstract class AbstractController implements ControllerInterface
      * @param array $data
      * @return false|string
      */
-   public function render(string $template, Array $data)
+   public function render(string $template, Array $data): bool|string
    {
         ob_start();
 
@@ -50,6 +52,16 @@ abstract class AbstractController implements ControllerInterface
 
         return ob_get_clean();
    }
+
+   public function createApiToken(SessionInterface $session, string $name): string
+   {
+       $token = Utils::createCsrfToken();
+
+       $session->set($name, $token);
+
+       return $token;
+   }
+
 
    public function initializeLayout(
        SessionInterface $session,
@@ -64,7 +76,6 @@ abstract class AbstractController implements ControllerInterface
        }
 
        if ($mustBeLogged !== null) {
-
            if (!$mustBeLogged && $this->isLoggedIn($session, $request)) {
                $this->redirectToRoute('/');
            }
@@ -72,8 +83,8 @@ abstract class AbstractController implements ControllerInterface
            if ($mustBeLogged && !$this->isLoggedIn($session, $request)) {
                $this->redirectToRoute('/login');
            }
-
        }
+       $templateVars["currentUrl"] = $request->getHost();
 
        $templateVars["logged"] = $this->isLoggedIn($session, $request);
 
@@ -88,6 +99,17 @@ abstract class AbstractController implements ControllerInterface
        $user = $session->get('user');
 
        $userCookie = $request->cookie->get('u_s_r_d');
+
+      if(!$user && $userCookie) {
+           $user = $this->container->get(EntityManager::class)
+               ->find(UserEntity::class,  (int)$userCookie);
+
+           if (empty($user)) {
+               return false;
+           }
+
+           $session->set('user', $user);
+       }
 
        if ($user && $userCookie && $user->getId() === (int)$userCookie) {
            return true;
@@ -113,9 +135,7 @@ abstract class AbstractController implements ControllerInterface
           if ($url[strlen($url)-1] === '&') {
               $url = rtrim($url,'&');
           }
-
        }
-
        header($url,true, 302);
    }
 
@@ -151,7 +171,7 @@ abstract class AbstractController implements ControllerInterface
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function isAdmin(SessionInterface $session, ?UserEntity $user = null)
+    public function isAdmin(SessionInterface $session, ?UserEntity $user = null): ?bool
     {
         $entityManager = $this->container->get(EntityManagerInterface::class);
 
@@ -159,12 +179,14 @@ abstract class AbstractController implements ControllerInterface
             $user = $this->getUser($session);
         }
 
+
         if (!is_object($entityManager)) {
             $entityManager = new $entityManager();
         }
 
+
         if ($user) {
-           if($entityManager->findBy(AdminEntity::class, ["user_id" => $user->getId()])) {
+           if(!empty($entityManager->findBy(AdminEntity::class, ["user_id" => $user->getId()]))) {
                return true;
            }
             return false;

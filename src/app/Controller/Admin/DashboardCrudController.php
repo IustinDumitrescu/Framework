@@ -9,7 +9,11 @@
 namespace App\Controller\Admin;
 
 
-use App\Admin\AdminDashboardConfigurator;
+
+use App\Admin\Config\AdminContext;
+use App\Admin\Fields\AdminDashboardField;
+use App\Admin\Config\AdminDashboardConfigurator;
+use App\Admin\Template\AdminTemplate;
 use App\Entity\AdminEntity;
 use App\Entity\UserEntity;
 use App\Http\Request;
@@ -27,28 +31,69 @@ class DashboardCrudController extends AbstractCrudController
      * @param Request $request
      * @return string
      */
-    public function admin(
-        SessionInterface $session,
+    public function admin(SessionInterface $session, Request $request): string
+    {
+        $adminTemplate = $this->initializeAdminLayout($session, $request);
+
+        $template = $this->configureDashboard($adminTemplate["user"], $adminTemplate["admin"], $request);
+
+        if (!$template) {
+            $this->redirect('/admin');
+        }
+
+        $adminTemplate["templateAdmin"] = $template;
+
+        return $this->render('/admin/homeLayout', $adminTemplate );
+    }
+
+    /**
+     * @param UserEntity $user
+     * @param AdminEntity $admin
+     * @param Request $request
+     * @return AdminTemplate|null
+     */
+    private function configureDashboard(
+        UserEntity $user,
+        AdminEntity $admin,
         Request $request
-    ): string
+    ): ?AdminTemplate
     {
-        $admin = $this->initializeAdminLayout($session, $request);
-
-        $user = $this->getUser($session);
-
-        dd($this->configureDashboard($user));
+        return AdminDashboardConfigurator::configureForThisUser($user, $admin, $request, $this->container)
+            ->configureItems(
+                AdminDashboardField::new('Admini',AdminCrudController::class, [
+                    "SUPER-ADMIN"
+                ], 'fa-solid fa-users')
+                    ->new('Newsletter Category', NewsletterCategoryCrudController::class, [
+                        "SUPER-ADMIN",
+                        "newsletter"
+                    ], 'fa fa-circle-info')
+                    ->new('Newsletter Content',NewsletterContentCrudController::class,
+                        [
+                            "SUPER-ADMIN",
+                            "newsletter"
+                        ], 'fa fa-bars')
+            )->getConfiguration();
 
     }
 
-
-    private function configureDashboard($user)
+    protected function handleNewEntityPersist(array $dataFromForm): array
     {
-       return AdminDashboardConfigurator::configureForThisUser($user)
-            ->new(UserEntity::class, 'SUPER_ADMIN')
-            ->new(AdminEntity::class)
-            ->getConfiguration();
-
+        return  [];
     }
 
 
+    public function getEntityName(): string
+    {
+        return '';
+    }
+
+    public function getName(): string
+    {
+        return '';
+    }
+
+    public function configureFields(AdminContext $context): array
+    {
+        return [];
+    }
 }
