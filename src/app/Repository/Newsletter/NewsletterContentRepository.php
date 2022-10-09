@@ -72,6 +72,7 @@ ORDER BY sbs1.created_at DESC
             ->setOperation('select')
             ->from(NewsletterContent::class)
             ->where('id_categorie ='. $category->getId())
+            ->orderBy('created_at', 'DESC')
             ->select(['*']);
 
         if ($query) {

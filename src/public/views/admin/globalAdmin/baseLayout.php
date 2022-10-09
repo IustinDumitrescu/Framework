@@ -101,7 +101,6 @@
         let hidden =  document.getElementById(`${idOfHidden}`);
 
         hidden.value = element.checked === true;
-
      }
  </script>
 

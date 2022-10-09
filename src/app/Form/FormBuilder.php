@@ -166,7 +166,6 @@ class FormBuilder implements FormBuilderInterface
         if (isset($formData[$idOfToken])) {
             return $session->get(($this->formId)) === $formData[$idOfToken];
         }
-
         return false;
     }
 

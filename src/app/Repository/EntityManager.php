@@ -233,8 +233,10 @@ class EntityManager implements EntityManagerInterface
 
             if ($value) {
                 $values .= "'$value'" . ',';
-            } else {
+            } else if ($value === null) {
                 $values .= "NULL,";
+            } else {
+                $values .= "false, ";
             }
         }
 

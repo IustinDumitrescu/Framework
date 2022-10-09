@@ -30,6 +30,8 @@
                 }
             } ?>
             <?php echo $formGetUserAge["form"] ;?>
+
+                <?php $x = 'nume'; $y = 'asd'; ?>
         </div>
     </div>
     </div>

@@ -151,7 +151,7 @@ abstract class AbstractCrudController extends AbstractController
             ]
         );
 
-        if ($formAdminNew->isSubmitted() && $formAdminNew->isValid()) {
+        if ($formAdminNew->isSubmitted()) {
             $dataFromForm = $formAdminNew->getData();
 
             $flash = $this->handleNewEntityPersist($dataFromForm);

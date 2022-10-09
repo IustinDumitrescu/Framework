@@ -98,22 +98,30 @@ final class NewsletterService
             ->setItemsOnPage(12)
             ->executeByPage($page, $arrayForm);
 
-        $count = count($newsletterContainer);
 
-        if (!empty($newsletterContainer)) {
-            for ($i = 0 ; $i < $count - 1; $i++) {
-                for ($j = 0; $j < $count - $i - 1; $j++) {
-                    $date1 = new \DateTime($newsletterContainer[$j]->getCreatedAt());
-                    $date2 = new \DateTime($newsletterContainer[$j+1]->getCreatedAt());
-                    if ($date1 < $date2) {
-                        $first = $newsletterContainer[$j];
-                        $newsletterContainer[$j] = $newsletterContainer[$j+1];
-                        $newsletterContainer[$j+1] = $first;
-                    }
-                }
-            }
+        /* Pentru executii fara paginatii si order by*/
 
-        }
+//        $count = count($newsletterContainer);
+//
+//        if (!empty($newsletterContainer)) {
+//            for ($i = 0 ; $i < $count - 1; $i++) {
+//                for ($j = 0; $j < $count - $i - 1; $j++) {
+//                    if (!$arrayForm) {
+//                        $date1 = new \DateTime($newsletterContainer[$j]->getCreatedAt());
+//                        $date2 = new \DateTime($newsletterContainer[$j + 1]->getCreatedAt());
+//                    } else {
+//                        $date1 = new \DateTime($newsletterContainer[$j]["created_at"]);
+//                        $date2 = new \DateTime($newsletterContainer[$j+1]["created_at"]);
+//                    }
+//                    if ($date1 < $date2) {
+//                        $first = $newsletterContainer[$j];
+//                        $newsletterContainer[$j] = $newsletterContainer[$j + 1];
+//                        $newsletterContainer[$j + 1] = $first;
+//                    }
+//                }
+//            }
+//
+//        }
         return $newsletterContainer;
     }
 
