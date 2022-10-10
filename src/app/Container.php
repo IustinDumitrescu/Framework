@@ -181,7 +181,6 @@ final class Container implements ContainerInterface
             $name = $parameter->getName();
 
             if (array_key_exists($name, $slugs)) {
-
                 foreach ($slugs as $key => $slug) {
 
                     if ($key === $name) {

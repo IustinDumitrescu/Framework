@@ -29,7 +29,10 @@
                     ";
                 }
             } ?>
-            <?php echo $formGetUserAge["form"] ;?>
+            <?php echo $formGetUserAge["form"]  ; ?>
+
+
+
         </div>
     </div>
     </div>
