@@ -44,5 +44,15 @@ class NewsletterCommentsRepository extends EntityManager
             ->orderBy('created_at', 'DESC');
     }
 
+    public function delete(NewsletterComments $comments): void
+    {
+        $this->createQueryBuilder()
+            ->setOperation(QueryBuilder::Delete)
+            ->from(NewsletterComments::class)
+            ->where("id = {$comments->getId()}")
+            ->getQuery()
+            ->execute();
+
+    }
 
 }

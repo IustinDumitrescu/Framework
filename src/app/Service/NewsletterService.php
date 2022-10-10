@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Newsletter\NewsletterCategory;
+use App\Entity\Newsletter\NewsletterComments;
 use App\Entity\Newsletter\NewsletterContent;
 use App\Entity\UserEntity;
 use App\Http\Request;
@@ -162,19 +163,22 @@ final class NewsletterService
                 } else {
                     $arrayOfComents[$key]["comment"] = [
                         "comentariu" => $comment->getComentariu(),
-                        "date" => $comment->getCreatedAt()
+                        "date" => $comment->getCreatedAt(),
+                        "id" => $comment->getId()
                     ];
 
                     if (!empty($arrayOfUser) && array_key_exists($comment->getIdUser(), $arrayOfUser)) {
                         $arrayOfComents[$key]["user"] = [
                             "nume" => $arrayOfUser[$comment->getIdUser()]->getFirstName() . " " . $arrayOfUser[$comment->getIdUser()]->getLastName(),
-                            "img" => $arrayOfUser[$comment->getIdUser()]->getImgPrin()
+                            "img" => $arrayOfUser[$comment->getIdUser()]->getImgPrin(),
+                            "id" => $arrayOfUser[$comment->getIdUser()]->getId()
                         ];
                     } else {
                         $currentUser = $this->userRepository->find(UserEntity::class, $comment->getIdUser());
                         $arrayOfComents[$key]["user"] = [
                             "nume" => $currentUser->getFirstName() . " " . $currentUser->getLastName(),
-                            "img" => $currentUser->getImgPrin()
+                            "img" => $currentUser->getImgPrin(),
+                            "id" => $currentUser->getId()
                         ];
                         $arrayOfUser[$currentUser->getId()] = $currentUser;
                     }
@@ -184,6 +188,11 @@ final class NewsletterService
         }
 
         return $arrayOfComents;
+    }
+
+    public function deleteComentariu(NewsletterComments $comentariu): void
+    {
+        $this->commentsRepository->delete($comentariu);
     }
 
 

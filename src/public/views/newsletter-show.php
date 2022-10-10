@@ -4,7 +4,7 @@
     <li><a href="/">Home</a></li>
     <li><a href="/newsletter">Newsletter</a></li>
     <li><a href="<?php echo '/newsletter/'.$category[0]->getSlug() ?>"> Newsletter <?php echo $category[0]->getDenumire() ?></a></li>
-    <li><a href="<?php echo '/newsletter/'.$category[0]->getSlug().'/'.$newsletter[0]->getTitlu() ?>"> Newsletter <?php echo $newsletter[0]->getTitlu() ?></a></li>
+    <li><a href="<?php echo '/newsletter/'.$category[0]->getSlug().'/'.$newsletter[0]->getSlug() ?>"> Newsletter <?php echo $newsletter[0]->getTitlu() ?></a></li>
 </ul>
 
 <div class="container">
@@ -41,8 +41,9 @@
                 <?php
                     if (!empty($comments)) {
                         $count = 0;
+                        $stringOfComments = '';
                         foreach ($comments as $comment) {
-                            echo "
+                            $stringOfComments .= "
                             <div class='m-3' style='padding: 0.5em; border-radius: 10px; border: 1px solid lightgrey;'>
                                  <div style='padding: 0.5em;' class='d-flex m-3'>
                                     <img style='border-radius: 50%; height: 50px; width: 50px;' src='../../{$comment['user']->getImgPrin()}' alt='img_user'>
@@ -57,15 +58,21 @@
                                     <div>
                                         <p style='color: black' '><i>{$comment["comment"]->getCreatedAt()}</i></p>
                                     </div>
-                                </div>
-                            </div>
-                            ";
+                                </div>";
+                            if ($logged && $comment["user"]->getId() === $user->getId()) {
+                                $stringOfComments .= "
+                                <button class='btn btn-danger sterge' data-id='{$comment["comment"]->getId()}'>Sterge</button>
+                                ";
+                            }
+
+                            $stringOfComments .= "</div>";
+
                             if ($count === 8) {
-                                echo '<span id="page_1"></span>';
+                                $stringOfComments .= '<span id="page_1"></span>';
                             }
                             $count++;
-
                         }
+                        echo $stringOfComments;
                     } else {
                         echo 'Nu exista comentarii !';
                     }
@@ -78,6 +85,16 @@
         let arrayOfseenElement = [];
 
         let page = 1;
+
+        let user = "<?php echo $logged ? 'true' : 'false'; ?>";
+
+        let userId = null;
+
+        const stergeElements = document.getElementsByClassName('sterge');
+
+        if (user === 'true') {
+            userId = parseInt(`<?php echo $user ? $user->getId() : 'null';?> `)
+        }
 
         $(document).ready( ()=> {
             $('#newsletterForm').submit((e) => {
@@ -92,6 +109,17 @@
                     ajaxCreateNewsletterComments(newData);
                 }
             });
+
+
+
+            if (stergeElements.length > 0) {
+                for (let i = 0; i < stergeElements.length; i++) {
+                    stergeElements[i].addEventListener('click', (e) => {
+                        let element = e.target;
+                        deleteElement(element);
+                    })
+                }
+            }
 
             arrayOfseenElement.push({
                 element: document.getElementById('page_1'),
@@ -196,7 +224,12 @@
                         <div>
                             <p style='color: black' '><i>${element["comment"].date}</i></p>
                         </div>
-                    </div>
+                    </div>`;
+                 if (userId && userId === element["user"].id) {
+                     template += `<button onclick="deleteElement(this)" class="btn btn-danger sterge" data-id='${element["comment"].id}'>Sterge</button>`;
+                 }
+
+                 template += `
                    </div>`
 
                  if (count === 8) {
@@ -216,6 +249,27 @@
                 )
             }
 
+        }
+
+        const deleteElement = (element) => {
+            let value = element.getAttribute('data-id');
+
+            let url = "<?php echo '/newsletter/'.$category[0]->getSlug().'/'.$newsletter[0]->getSlug().'/ajaxDeleteItem' ;?>";
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('DELETE', url);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.setRequestHeader("Content-type","application/json");
+            xhr.send(JSON.stringify({id: value}));
+            xhr.onload = (e) => {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    let response = JSON.parse(xhr.responseText);
+                    if (response) {
+                        let parent = element.parentElement;
+                        parent.remove();
+                    }
+                }
+            };
         }
 
         function isInViewPort(element)

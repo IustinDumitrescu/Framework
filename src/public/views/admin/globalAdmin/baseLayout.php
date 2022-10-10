@@ -94,13 +94,14 @@
 </div>
  <script>
      function changeValue (element) {
-        let idOfCheckbox = element.getAttribute('id');
-
-        let idOfHidden = idOfCheckbox.substring(0, idOfCheckbox.length - 9);
-
-        let hidden =  document.getElementById(`${idOfHidden}`);
-
-        hidden.value = element.checked === true;
+        if (element.checked === true) {
+            element.value = 'true';
+        } else {
+            element.value = 'false';
+        }
+        $('#AdminiFormEdit').on('submit', ()=> {
+            element.checked = true;
+        });
      }
  </script>
 

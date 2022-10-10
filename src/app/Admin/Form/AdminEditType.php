@@ -3,6 +3,8 @@
 namespace App\Admin\Form;
 
 use App\Form\AbstractType;
+use App\Form\InputTypes\CheckBoxType;
+use App\Form\InputTypes\ChoiceType;
 use App\Form\InputTypes\SubmitType;
 use App\Interfaces\FormBuilderInterface;
 
@@ -14,30 +16,24 @@ class AdminEditType extends AbstractType
         $builder->createHead($formHead);
 
         foreach ($options["data"] as $field) {
-            if ($field->getTypeChosen() === 'choice') {
+            if ($field->getTypeChosen() === ChoiceType::class) {
                 $options = $field->getOptions();
-
                 $choices = $options["choices"];
                 $value = $options["value"];
-
                 $newOptions = [];
-
                 foreach ($choices as $name => $choice) {
                     if ($value === $choice) {
                         $newOptions[$name] = $value;
                     }
                 }
                 $differences = array_diff_assoc($choices, $newOptions );
-
                 foreach ($differences as $key => $difference) {
                     $newOptions[$key] = $difference;
                 }
-
                 $field->setOption("choices", $newOptions);
-            } else if (($field->getTypeChosen() === 'checkbox') && $field->getOptions()["value"]) {
-                $field->setOption("checked", '');
+            } else if (($field->getTypeChosen() === CheckBoxType::class) && $field->getOptions()["value"]) {
+                $field->setOption("checked", 'checked');
             }
-
             $builder->add($field->getName(), $field->getId(), $field->getTypeChosen(), $field->getOptions());
         }
 

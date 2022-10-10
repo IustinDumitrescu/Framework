@@ -72,6 +72,11 @@ class DashboardCrudController extends AbstractCrudController
                             "SUPER-ADMIN",
                             "newsletter"
                         ], 'fa fa-bars')
+                    ->new('Newsletter Comments', NewsletterCommentsCrudController::class,
+                        [
+                            "SUPER-ADMIN",
+                            "newsletter"
+                        ], 'fa fa-bars')
             )->getConfiguration();
 
     }
