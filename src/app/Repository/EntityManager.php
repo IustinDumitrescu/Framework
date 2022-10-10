@@ -159,9 +159,7 @@ class EntityManager implements EntityManagerInterface
            if (in_array($nameOfProperty, $infoSchema,true)) {
                $properties[] = $reflectionProperty->getName();
            }
-
        }
-
        $valuesForQuery = [];
 
        foreach ($properties as $property) {
@@ -173,7 +171,6 @@ class EntityManager implements EntityManagerInterface
        }
 
        return $this->getInsertQuery($valuesForQuery, $table);
-
     }
 
     /**
@@ -227,14 +224,15 @@ class EntityManager implements EntityManagerInterface
 
         $values = '';
 
-
         foreach ($propertiesAndValues as $property => $value) {
             $columns .= $property . ',';
 
             if ($value) {
                 $values .= "'$value'" . ',';
-            } else {
+            } else if ($value === null) {
                 $values .= "NULL,";
+            } else {
+                $values .= "false, ";
             }
         }
 
@@ -245,7 +243,6 @@ class EntityManager implements EntityManagerInterface
         $sql .= $newColumns.')'.' VALUES ('.$newValues.')';
 
         return $sql;
-
     }
 
 

@@ -51,9 +51,9 @@ final class HomeService
 
     public function sanitizeAndCreateUser(array $dataSubmitted): UserEntity
     {
-        $firstName = filter_var($dataSubmitted["first_name"],FILTER_SANITIZE_STRING);
+        $firstName = filter_var($dataSubmitted["first_name"],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-        $lastName = filter_var($dataSubmitted["last_name"],FILTER_SANITIZE_STRING );
+        $lastName = filter_var($dataSubmitted["last_name"],FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
         $age = filter_var($dataSubmitted["age"], FILTER_VALIDATE_INT) ? $dataSubmitted["age"] : 0;
 

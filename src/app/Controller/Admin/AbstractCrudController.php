@@ -151,6 +151,8 @@ abstract class AbstractCrudController extends AbstractController
             ]
         );
 
+
+
         if ($formAdminNew->isSubmitted() && $formAdminNew->isValid()) {
             $dataFromForm = $formAdminNew->getData();
 
@@ -206,7 +208,6 @@ abstract class AbstractCrudController extends AbstractController
         }
 
         foreach ($context->getFields() as $field) {
-
             $get = 'get'.Utils::dashesToCamelCase($field->getId(), true);
             $field->setOption("value", $entity->$get());
         }

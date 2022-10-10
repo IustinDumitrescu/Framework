@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Newsletter\NewsletterCategory;
+use App\Entity\Newsletter\NewsletterComments;
 use App\Entity\Newsletter\NewsletterContent;
 use App\Entity\UserEntity;
 use App\Http\Request;
@@ -98,22 +99,30 @@ final class NewsletterService
             ->setItemsOnPage(12)
             ->executeByPage($page, $arrayForm);
 
-        $count = count($newsletterContainer);
 
-        if (!empty($newsletterContainer)) {
-            for ($i = 0 ; $i < $count - 1; $i++) {
-                for ($j = 0; $j < $count - $i - 1; $j++) {
-                    $date1 = new \DateTime($newsletterContainer[$j]->getCreatedAt());
-                    $date2 = new \DateTime($newsletterContainer[$j+1]->getCreatedAt());
-                    if ($date1 < $date2) {
-                        $first = $newsletterContainer[$j];
-                        $newsletterContainer[$j] = $newsletterContainer[$j+1];
-                        $newsletterContainer[$j+1] = $first;
-                    }
-                }
-            }
+        /* Pentru executii fara paginatii si order by*/
 
-        }
+//        $count = count($newsletterContainer);
+//
+//        if (!empty($newsletterContainer)) {
+//            for ($i = 0 ; $i < $count - 1; $i++) {
+//                for ($j = 0; $j < $count - $i - 1; $j++) {
+//                    if (!$arrayForm) {
+//                        $date1 = new \DateTime($newsletterContainer[$j]->getCreatedAt());
+//                        $date2 = new \DateTime($newsletterContainer[$j + 1]->getCreatedAt());
+//                    } else {
+//                        $date1 = new \DateTime($newsletterContainer[$j]["created_at"]);
+//                        $date2 = new \DateTime($newsletterContainer[$j+1]["created_at"]);
+//                    }
+//                    if ($date1 < $date2) {
+//                        $first = $newsletterContainer[$j];
+//                        $newsletterContainer[$j] = $newsletterContainer[$j + 1];
+//                        $newsletterContainer[$j + 1] = $first;
+//                    }
+//                }
+//            }
+//
+//        }
         return $newsletterContainer;
     }
 
@@ -154,19 +163,22 @@ final class NewsletterService
                 } else {
                     $arrayOfComents[$key]["comment"] = [
                         "comentariu" => $comment->getComentariu(),
-                        "date" => $comment->getCreatedAt()
+                        "date" => $comment->getCreatedAt(),
+                        "id" => $comment->getId()
                     ];
 
                     if (!empty($arrayOfUser) && array_key_exists($comment->getIdUser(), $arrayOfUser)) {
                         $arrayOfComents[$key]["user"] = [
                             "nume" => $arrayOfUser[$comment->getIdUser()]->getFirstName() . " " . $arrayOfUser[$comment->getIdUser()]->getLastName(),
-                            "img" => $arrayOfUser[$comment->getIdUser()]->getImgPrin()
+                            "img" => $arrayOfUser[$comment->getIdUser()]->getImgPrin(),
+                            "id" => $arrayOfUser[$comment->getIdUser()]->getId()
                         ];
                     } else {
                         $currentUser = $this->userRepository->find(UserEntity::class, $comment->getIdUser());
                         $arrayOfComents[$key]["user"] = [
                             "nume" => $currentUser->getFirstName() . " " . $currentUser->getLastName(),
-                            "img" => $currentUser->getImgPrin()
+                            "img" => $currentUser->getImgPrin(),
+                            "id" => $currentUser->getId()
                         ];
                         $arrayOfUser[$currentUser->getId()] = $currentUser;
                     }
@@ -176,6 +188,11 @@ final class NewsletterService
         }
 
         return $arrayOfComents;
+    }
+
+    public function deleteComentariu(NewsletterComments $comentariu): void
+    {
+        $this->commentsRepository->delete($comentariu);
     }
 
 

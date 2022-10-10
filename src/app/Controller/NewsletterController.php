@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Newsletter\NewsletterCategory;
+use App\Entity\Newsletter\NewsletterComments;
 use App\Entity\Newsletter\NewsletterContent;
 use App\Form\Newsletter\NewsletterCommentType;
 use App\Form\Newsletter\NewsletterSearchType;
@@ -204,6 +205,52 @@ class NewsletterController extends AbstractController
 
         return $this->render('newsletter-show', $templateVars);
     }
+
+    public function ajaxDeleteItem(
+        SessionInterface $session,
+        Request $request,
+        NewsletterService $newsletterService,
+        string $slugCategorie,
+        string $slugNewsletter
+    )
+    {
+        if ($this->isLoggedIn($session, $request) && $this->isXmlHttpRequest($request) && $request->isMethod() === 'DELETE') {
+            $em = $this->container->get(EntityManager::class);
+
+            $data = $request->request->getJsonDataFromAjaxRequest();
+
+            $category = $em->findBy(NewsletterCategory::class, [
+                "slug" => filter_var($slugCategorie, FILTER_SANITIZE_FULL_SPECIAL_CHARS)
+            ]);
+
+            if (!empty($data["id"]) && !empty($category)) {
+                $newsletter = $em->findBy(NewsletterContent::class, [
+                    "slug" => filter_var($slugNewsletter, FILTER_SANITIZE_FULL_SPECIAL_CHARS),
+                    "id_categorie" => $category[0]->getId()
+                ]);
+
+                if (!empty($newsletter) && filter_var($data["id"], FILTER_VALIDATE_INT)) {
+                    $user = $this->getUser($session);
+                    $comentariu = $em->findBy(NewsletterComments::class,
+                        [
+                            "id" => (int)$data["id"],
+                            "id_newsletter" => (int)$newsletter[0]->getId(),
+                            "id_user" => $user->getId()
+                        ]
+                    );
+
+                    if (!empty($comentariu)) {
+                        $newsletterService->deleteComentariu($comentariu[0]);
+                        return json_encode(["result" => "success"], JSON_THROW_ON_ERROR);
+                    }
+                }
+            }
+        }
+
+        die();
+    }
+
+
 
     /**
      * @param SessionInterface $session

@@ -161,7 +161,7 @@ class AdminCrudController extends AbstractCrudController
             ];
         }
 
-        $superAdmin = $dataFromForm["super_admin"] === "true";
+        $superAdmin = isset($dataFromForm["super_admin"]);
 
         $adminEntity = new AdminEntity();
 

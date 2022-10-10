@@ -15,7 +15,10 @@
     <div class="container pt-1">
         <div class="col-xl-6 col-lg-7 col-md-9 col-12 mx-auto">
             <div class='bg-white shadow rounded custom_padding-all'>
-            <?php if (isset($flash)) {
+            <?php
+            /*Hello */
+
+            if (isset($flash)) {
                 if ($flash["flashType"]) {
                     echo "
                     <div class=\"alert alert-success\" role=\"alert\">

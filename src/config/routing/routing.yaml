@@ -69,4 +69,10 @@ Routes:
     controller: '\App\Controller\NewsletterController'
     method: 'getNewsletterOfCategoryPaginated'
     slug: ["slugCategorie"]
+  ajaxDeleteItem:
+    path: '/newsletter/{slugCategorie}/{slugNewsletter}/ajaxDeleteItem'
+    controller: '\App\Controller\NewsletterController'
+    method: 'ajaxDeleteItem'
+    slug: ["slugCategorie", "slugNewsletter"]
+
 

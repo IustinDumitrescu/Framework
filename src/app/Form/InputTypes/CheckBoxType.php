@@ -23,7 +23,7 @@ class CheckBoxType implements InputTypesInterface
     {
         $stringOfOption = '';
 
-        $this->id = "{$id}_checkbox";
+        $this->id = $id;
 
         foreach ($options as $key => $option) {
             if (!is_array($option)) {
@@ -37,14 +37,11 @@ class CheckBoxType implements InputTypesInterface
 
         $this->viewString = "
         <div class='form-group d-flex'>
-             <label class='switch' for='{$id}_checkbox'>
-                <input type='checkbox' name='{$id}_checkbox[{$id}_checkbox]' onchange='changeValue(this)' {$stringOfOption} id='{$id}_checkbox'>
+             <label class='switch' for='{$id}'>
+                <input type='checkbox' name='{$id}[{$id}]' onchange='changeValue(this)' {$stringOfOption}='' id='{$id}'>
                 <span class='slider round'></span>
              </label>
              <span class='ml-2'>{$name}</span>
-        </div>
-        <div class='form-group'>
-            <input type='hidden' name='{$id}[{$id}]' id='{$id}' $initialValue >
         </div>
        ";
     }
